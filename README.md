@@ -59,11 +59,13 @@ For a character string received not beginning with '/', it is within-room broadc
 Else it is a command.\
 \
 case command\
-“/r”\
-“/j roomname” “/l”\
-“/x”\
-“/p name” “/q”\
-“/f filename”\
+“/r” //Send room names, "Hobby 330" (if the server has Hobby and 330 rooms)\
+“/j roomname” //Send "ok", so the client knows the user is in the "roomname"\
+“/l” //Send the names of the users in the current room\
+“/x” //Close the connection and log off the server\
+“/p name” //Send "ok" to let the client know the user is in private chat with name\
+“/q” //Send "ok" to let the client know the private chat with name ended\
+“/f filename” //Read file name and data from the client and send the file name and data to the designated client in the above file transfer format\
 end case;\
 \
 All strings must be sent with the terminating 0, except sign in session and file command. For example, “/r” must be send as '/', 'r', and 0.
