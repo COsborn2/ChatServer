@@ -12,7 +12,7 @@ commands:\
 “/x” - close the connection and log off the server “/p” name - private chat\
 “/q” - end private chat\
 “/f” filename - send file\
-“/h” - help
+“/h” - help \
 Sample client session: \
 > ./a.out\
 > Enter your name: Tom  //You type Tom\
