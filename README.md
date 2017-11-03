@@ -66,14 +66,6 @@ case command\
 “/f filename”\
 end case;\
 \
-All strings must\
-be sent as '/', 'r', and 0.\
-Send room names, “Hobby 330” (if the server has Hobby and 330 rooms). Send “ok”, so the client knows the user is in the “roomname”.\
-Send the names of the users in the current room\
-Close the connection and log off the server\
-Send “ok” to let the client know the user is in private chat with name.\
-Send “ok” to let the client know the private chat with name ended.\
-Read file name and data from the client and send the file name and data to the designated client in the above file transfer format.\
-be sent with the terminating 0, except sign in session and file command. For example, “/r” must\
+All strings must be sent with the terminating 0, except sign in session and file command. For example, “/r” must be send as '/', 'r', and 0.
 
 
