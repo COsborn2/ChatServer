@@ -13,32 +13,32 @@ commands:\
 “/q” - end private chat\
 “/f” filename - send file\
 “/h” - help
-> Sample client session: \
+Sample client session: \
 > ./a.out\
-> Enter your name: Tom\
-> Welcome to E-Chat.\
-> /r\
-> Hobby, 330\
-> /j Hobby\
-> Hobby:\
-> Hobby:\
-> Hobby:\
-> Hobby:\
-> Hobby:\
-> /r\
-> Hobby,\
-> Hobby:\
-> Hobby:\
-> 330: /l\
+> Enter your name: Tom &&&&&&&&&&&&&&&&&&&&&&&& //You type Tom\
+> Welcome to E-Chat. &&&&&&&&&&&&&&&&&&&&&&&&&&&&//From the server\
+> /r &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Hobby, 330 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//From the server\
+> /j Hobby &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Hobby: prompt show up with room name\
+> Hobby: hello &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//Prompt with room name\
+> Hobby: (Jerry Wrote) hello &&&&&&&&&&&&&&&&&&&//From server if Jerry wrote hello\
+> Hobby: /l &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Hobby: Tom &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//From the server\
+> /r &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Hobby, 330 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//From the server\
+> Hobby: bye everyone &&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Hobby: /j 330 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type (notice prompt changes to 330)\
+> 330: /l &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
 > 330: Trump Hana\
-> 330: /p Trump\
-> Trump: you idiot\
-> Trump: that is fake\
-> Trump: No it is not\
-> Trump: /q\
-> 330:\
+> 330: /p Trump &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Trump: you idiot &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Trump: that is fake &&&&&&&&&&&&&&&&&&&&&&&&&&&&&//Trump typed\
+> Trump: No it is not &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type\
+> Trump: /q &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You type to quit private chat\
+> 330: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//You are back to room 330\
 > 330: /p Hana\
-> 330: /f myfile\
+> 330: /f myfile &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&//Hana sees "file transferred"\
 > 330: /x
 
 for f command, packet format \
@@ -48,9 +48,16 @@ for f command, packet format \
 size of file | file name | data\
  --------------------------------------------------------------------------\
 Server-Client transaction\
+\
 After accept(), the server sends “ok” (2 bytes) to the client. The client upon receipt of “ok” sends the client's user name in 8 bytes. Server sends “ok” (2 bytes) to the client, signaling the client is entered in the client list and ready for the chat session.\
-Chat session Server:\
-For a character string received not beginning with '/', it is within-room broadcast. Else it is a command.\
+\
+Chat session\
+\ 
+Server:\
+\
+For a character string received not beginning with '/', it is within-room broadcast.\ 
+Else it is a command.\
+\
 case command\
 “/r”\
 “/j roomname” “/l”\
@@ -58,6 +65,7 @@ case command\
 “/p name” “/q”\
 “/f filename”\
 end case;\
+\
 All strings must\
 be sent as '/', 'r', and 0.\
 Send room names, “Hobby 330” (if the server has Hobby and 330 rooms). Send “ok”, so the client knows the user is in the “roomname”.\
