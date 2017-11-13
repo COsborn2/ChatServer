@@ -1,7 +1,11 @@
 #include "commands.h"
 
 /*
+ * int isCommand(char * toParse) -> Return 1 if true, 0 if false.
  * int isValidCommand(char * toParse) -> Takes command as string and checks if it is valid
+ * void executeCommand(char * toParse) -> Run associated command
+ * void makeLowerCase(char * toParse) -> Replace elements with lowercase equivalent
+ * void removeSpaces(char * toParse) -> Remove spaces from passed in char array
  *
  *
  * “/r” - list the rooms on the server
@@ -14,13 +18,27 @@
  * “/f filename"  - send file
  */
 
-
+/*
+ * Check if first character in array is /. If it is, the string is a command, not a chat message
+ * Returns 0 if false. 1 if true
+ */
+int isCommand(char * toParse){
+    if(toParse != NULL){
+        if(strlen(toParse) >= 1){
+            removeSpaces(toParse);
+            if(toParse[0] == '/')
+                return 1;
+            else
+                return 0;
+        }
+    }
+}
 /* return 1 if the command is VALID. Returns 0 if the command is NOT valid
  * Take command in form: /j testRoom
  */
 int isValidCommand(char * toParse){
     if(toParse != NULL && strlen(toParse) >= 2){
-        if(toParse[0] == "/") { //starts with command character. Definitely not a chat message
+        if(toParse[0] == '/') { //starts with command character. Definitely not a chat message
 
             char temporaryS[strlen(toParse)+1];
             strcpy(temporaryS, toParse);
@@ -77,6 +95,9 @@ int isValidCommand(char * toParse){
     }else
         return 0;
 }
+/*
+ * Take in validated String with a command and run associated action
+ */
 void executeCommand(char * toParse){
     if(isValidCommand(toParse)) {
         char toTest = temporaryS[1];
@@ -112,6 +133,9 @@ void makeLowerCase(char * toParse){
         }
     }
 }
+/*
+ * Take in a char array and remove spaces
+ */
 void removeSpaces(char * toParse) {
     int count = 0;
 
