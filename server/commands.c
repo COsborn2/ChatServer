@@ -33,6 +33,7 @@ int isCommand(char * toParse){
         }
     }
 }
+
 /* return 1 if the command is VALID. Returns 0 if the command is NOT valid
  * Take command in form: /j testRoom
  */
@@ -95,6 +96,7 @@ int isValidCommand(char * toParse){
     }else
         return 0;
 }
+
 /*
  * Take in validated String with a command and run associated action
  */
@@ -122,6 +124,7 @@ void executeCommand(char * toParse){
         }
     }
 }
+
 /*
  * Take incoming String and convert it to lower case
  */
@@ -133,6 +136,7 @@ void makeLowerCase(char * toParse){
         }
     }
 }
+
 /*
  * Take in a char array and remove spaces
  */
