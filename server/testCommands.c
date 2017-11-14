@@ -16,6 +16,36 @@
  * “/f filename"  - send file
  */
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <ctype.h>
+
+int isCommand(char * toParse);
+int isValidCommand(char * toParse);
+void makeLowerCase(char * toParse);
+void executeCommand(char * toParse);
+void removeSpaces(char * toParse);
+void strip(char * toParse);
+
+int main(){
+    char test[100];
+
+    fgets(test, 100, stdin);
+
+    strip(test);
+
+    printf("toParse strlen: %d\n", strlen(test));
+
+    printf("isCommand: %d\n", isCommand(test));
+    printf("isValidCommand: %d\n", isValidCommand(test));
+
+    return 0;
+}
+
 /*
  * Check if first character in array is /. If it is, the string is a command, not a chat message
  * Returns 0 if false. 1 if true
@@ -150,10 +180,6 @@ void removeSpaces(char * toParse) {
     }
     toParse[count] = '\0';
 }
-
-/*
- * Takes in string and removes newline and tab characters
- */
 void strip(char * toParse) {
     if(toParse != NULL) {
         int len = strlen(toParse);
