@@ -28,12 +28,13 @@ int main(int argc,char **argv)
     char IP[20] = "127.0.0.1"; 
     int port = 22000;
     getUserName(userName);
+
 /*Take an optional IP address, or IP Address and port no. from command line*/
     if(argc == 2){
-	IP = (char*)argv[1];
+	IP[0] = *argv[1];
     }    
     else if(argc == 3){
-	IP = (char*)argv[1];
+	IP[0] = *argv[1];
 	port = (uint16_t)argv[2];
     } 
 	
@@ -53,7 +54,7 @@ int main(int argc,char **argv)
 	    bzero(ack, 2);
 	    read(sockfd, ack, 2);
 	    if(strcmp(ack, "ok") == 0){
-	        pthread_create(&thread1, NULL, readT, &sockfd);
+	       // pthread_create(&thread1, NULL, readT, &sockfd);
 
 		/*Takes input from client, writes to server and echoes to terminal*/
 	        while(1)
