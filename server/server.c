@@ -13,12 +13,13 @@
 struct client{
     int connected;
     int sockedfd;
-    char name[20];
+    char name[8];
 };
 typedef struct client Client;
 
 void printToClients(char message[],Client * clientList, int numOfClients, char name[], int notToSend);
 void closeServer(Client * clientlist, int numOfClients, int listenFd);
+int uniqueName(char userName[]);
 
 int main() {
     char receiveLine [MAX];
@@ -61,14 +62,28 @@ int main() {
 
 
                     if (numberOfClients < MAXCLIENTS) { //if there is room for the additional client
-                        //add client
-                        clients[currentFd-3].connected = 1;
-                        FD_SET(currentFd,&fdsMaster);
-                        numberOfClients++;
-                        read(currentFd,&receiveLine,MAX);
-                        printToClients("connected",clients,numberOfClients,"", -1);
-                        printf("fd %d connected",currentFd);
-                        //print to all clients that someone connected
+			//add client
+			write(clients[currentFd-3].sockedfd, "ok", 2);
+			while(1){
+			    bzero(receiveLine, MAX);
+			    read(clients[currentFd-3].sockedfd,&receiveLine,8);
+			    if(uniqueName(receiveLine)){   
+				strcpy(clients[currentFd-3].name, receiveLine);
+				printf("%s\n", clients[currentFd-3].name);
+				printf("%s\n", clients[currentFd-3].name);	
+				clients[currentFd-3].connected = 1;
+				FD_SET(currentFd,&fdsMaster);
+				numberOfClients++;
+				write(clients[currentFd-3].sockedfd, "ok", 2);
+			        printToClients("connected",clients,numberOfClients,"", -1);
+			        printf("fd %d connected\n",currentFd);
+			        //print to all clients that someone connected
+				break;
+			    }
+			    else{
+				write(clients[currentFd-3].sockedfd, "no", 2);
+			    }
+			}
                     }
                     else {
                         //add client to waitlist
@@ -145,4 +160,8 @@ void closeServer(Client * clientlist, int numOfClients, int listenFd){
     close(0);
     close(listenFd);
     _exit(1);
+}
+
+int uniqueName(char userName[]){
+    return 1;
 }
