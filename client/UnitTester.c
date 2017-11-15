@@ -16,9 +16,6 @@ int main(int argc, char** argv){
         case 2:
             printf("Filesize of \"%s\": %i\n", param, fileSize(param));
             break;
-        case 3:
-            recFile(0);
-            break;
         default:
             fprintf(stderr, "No such switch%d\n", tester);
 
