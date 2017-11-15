@@ -8,3 +8,4 @@ file.o:	file.c file.h
 
 clean: 
 	rm *.o tester
+	
