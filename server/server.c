@@ -58,46 +58,68 @@ int main() {
 
                 if (currentFd == listenFd) {
                     /*if current fd is the listenFd then its a pending connection*/
-                    clients[currentFd - 3].sockedfd = accept(listenFd, (struct sockaddr *) NULL, NULL);                                         //do i pass struct pointer?
+                    Client newClient;
+                    newClient.sockedfd = accept(listenFd, (struct sockaddr *) NULL, NULL);                                         //do i pass struct pointer?
 
 
                     if (numberOfClients < MAXCLIENTS) {
                         /*if there is room to add another client*/
-                        write(clients[currentFd - 3].sockedfd, "ok", 2);
+                        write(newClient.sockedfd, "ok", 2);
 
+                        ////////////////////////////////////////////////
+                        /**This entire while loop should be another thread so server doesnt hang**/
                         while (1) {
                             /*while the name is not unique, reprompt*/
                             bzero(receiveLine, MAX);
-                            read(clients[currentFd - 3].sockedfd, &receiveLine, 8);
+                            read(newClient.sockedfd, &receiveLine, 8);
                             if (uniqueName(receiveLine)) {
                                 /*add new client*/
-                                strcpy(clients[currentFd - 3].name, receiveLine);
-                                printf("%s\n", clients[currentFd - 3].name);
-                                printf("%s\n", clients[currentFd - 3].name);
-                                clients[currentFd - 3].connected = 1;
-                                FD_SET(currentFd, &fdsMaster);
+                                strcpy(newClient.name, receiveLine);
+                                printf("%s\n", temp.name);
+                                printf("%s\n", temp.name);                      //why are there 2 print statements?
+                                temp.connected = 1;
+                                FD_SET(newClient.sockedfd, &fdsMaster);
                                 numberOfClients++;
-                                write(clients[currentFd - 3].sockedfd, "ok", 2);
+                                write(newClient.sockedfd, "ok", 2);
+
+                                int curClient;
+                                char msg[] = newClient.name + " connected";
+                                for (curClient = 0; curClient < numOfClients; curClient++) {
+                                    /*the first client in the array that is connected gets replaced*/
+                                    if(clients[curClient].connected != 1)
+                                        clients[curClient] = newClient;
+                                    /*print current client has connected to other clients*/
+                                    if(curClient != temp.sockedfd)
+                                        write(clientList[curClient].sockedfd, msg, strlen(msg));
+                                }
                                 printToClients("connected", clients, numberOfClients, "", -1);
                                 printf("fd %d connected\n", currentFd);
                                 //print to all clients that someone connected
                                 break;
                             } else {
                                 /*reject clients name*/
-                                write(clients[currentFd - 3].sockedfd, "no", 2);
+                                write(newClient.sockedfd, "no", 2);
                             }
                         }//end unique name loop
+                        ////////////////////////////////////////////////
+
                     }//end add new client
 
                     else {
                         /*else there is not room, so add client to waitlist*/
-                        char message[] = "There are already ";
+                        char message[100] = "There are already ";
                         strcat(message, MAXCLIENTS);
                         strcat(message," people. You are being added to the waitlist.");
 
                         /*   waitlist   */
-                        write(clients[currentFd].sockedfd, message, strlen(message));
-                        close(clients[currentFd].sockedfd);
+                        write(newClient.sockedfd, message, strlen(message));
+
+                        newClient.connected = 1;
+                        int i;
+                        for(i = 0; i < MAXWAITLIST; i++){
+                            if(waitlist[i].connected = -1)
+                                waitlist[i] = newClient;
+                        }
 
                     }//end add to waitlist
                     break;
@@ -128,13 +150,27 @@ int main() {
                     /*The current fd is a client sending a message*/
                     if (read(currentFd, receiveLine, MAX)) {
                         /*if the client sends atleast 1 byte*/
+
+                        ////////////////////////////////////////////////
+                        /**use receiveLine to check if **/
                         if (strcmp(receiveLine, "/disconnect")) {
                             /*if client sends '/disconnect' then close its connection*/
                             printToClients("Client disconnected", clients, numberOfClients, "server", currentFd);
                             clients[currentFd].connected = 0;
                             numberOfClients--;
                         }
-                        printToClients(receiveLine, clients, numberOfClients, clients->name, currentFd);
+                        ////////////////////////////////////////////////
+
+
+
+                        int curClient;
+
+                        for (curClient = 0; curClient < numOfClients; curClient++) {
+                            /*print current clients message to clients*/
+                            if(curClient != currentFd)
+                                write(clientList[curClient].sockedfd, receiveLine, strlen(receiveLine));
+                        }
+
                     }
                     else {
                         /*current client did not send data, and is disconnecting*/
