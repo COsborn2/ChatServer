@@ -1,237 +1,140 @@
+#include <arpa/inet.h>
+#include <ctype.h>
 #include <stdio.h>
-#include <netinet/in.h>
-#include <memory.h>
-
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
+#include "commands.h"
+#include "lang.h"
 #include "server.h"
 
-void closeServer(Client *clientlist, int numOfClients, int listenFd);
-void printToClients(char message[],Client * roomClients, int sendingFD);
-int uniqueName(char userName[]);
+/*
+ * Changed the server loop a lot to account for new requirements (/s command for name changing instead of on join, etc.)
+ * All the name checking code is missing, since it will need to be put with the rest of the commands
+ * This part should be done, just needs the code added in case all of the client slots are full
+ */
+
+void server();
 
 int main() {
-    char receiveLine[MAX];
-    char sendLine[MAX];
-    int serverFd, listenFd;
-    struct sockaddr_in servaddr;
+	char defaultName[] = DEFAULT_CLIENT_NAME;
+	Client clients[MAXCLIENTS];
+	memset(clients, 0, MAXCLIENTS * sizeof(Client));
+	Message recMessage;
+	Message sendMessage;
+	
+	unsigned int listenFd, maxfd;
+	struct sockaddr_in svaddr;
+	
+	listenFd = socket(AF_INET, SOCK_STREAM, 0);
+	svaddr.sin_family = AF_INET;
+	svaddr.sin_addr.s_addr = htons(INADDR_ANY);
+	svaddr.sin_port = htons(SERVER_PORT);
+	
+	bind(listenFd, (struct sockaddr *)&svaddr, sizeof(svaddr));
 
-    listenFd = socket(AF_INET, SOCK_STREAM, 0);
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htons(INADDR_ANY);
-    servaddr.sin_port = htons(22000);
-    bind(listenFd, (struct sockaddr *) &servaddr, sizeof(servaddr));
-    listen(listenFd, 10);
-
-
-    fd_set fdsMaster, fdsCopy;
-    char byteRead;
-    int currentFd, numberOfClients = 0;
-    Client waitlist[MAXWAITLIST];
-    Client clients[MAXCLIENTS];
-
-    FD_ZERO(&fdsMaster);             //zeros all bits in fdsMaster so none are listened to
-    FD_SET(0, &fdsMaster);           //sets fdsMaster[0] to 1 so it listens to the kb
-    FD_SET(listenFd, &fdsMaster);    //adds socket fd
-    fdsCopy = fdsMaster;             //bitwise copy
-
-
-    while (1) {
-        fdsCopy = fdsMaster;
-        select(FD_SETSIZE, &fdsCopy, NULL, NULL, NULL);                       //dont care about writefds or exceptfds, last is to blobk indefinitly. returns 1 if something is ready
-
-        for (currentFd = 0; currentFd < FD_SETSIZE; currentFd++) {
-            if (FD_ISSET(currentFd, &fdsCopy)) {
-                /*if current fd in the fd set is ready to be read*/
-
-                if (currentFd == listenFd) {
-                    /*if current fd is the listenFd then its a pending connection*/
-                    Client newClient;
-                    newClient.sockedfd = accept(listenFd, (struct sockaddr *) NULL, NULL);                                         //do i pass struct pointer?
-
-
-                    if (numberOfClients < MAXCLIENTS) {
-                        /*if there is room to add another client*/
-                        write(newClient.sockedfd, "ok", 2);
-
-                        ////////////////////////////////////////////////
-                        /**This entire while loop should be another thread so server doesnt hang**/
-                        while (1) {
-                            /*while the name is not unique, reprompt*/
-                            bzero(receiveLine, MAX);
-                            read(newClient.sockedfd, &receiveLine, 8);
-                            if (uniqueName(receiveLine)) {
-                                /*add new client*/
-                                strcpy(newClient.name, receiveLine);
-                                printf("%s\n", newClient.name);
-                                newClient.connected = 1;
-                                FD_SET(newClient.sockedfd, &fdsMaster);
-                                numberOfClients++;
-                                write(newClient.sockedfd, "ok", 2);
-
-                                //print to all clients that someone connected
-                                char msg[25];
-                                strcat(msg, newClient.name);
-                                strcat(msg," connected");
-                                printf("fd %d connected\n", currentFd);
-                                printToClients(msg, clients, newClient.sockedfd);
-
-
-                                /**this should be an addClient method that adds client to the wait room **/
-                                int curClient;
-                                for (curClient = 0; curClient < MAXCLIENTS; curClient++) {
-                                    /*the first client in the array that is not connected gets replaced*/
-                                    if (clients[curClient].connected != 1) {
-                                        clients[curClient] = newClient;
-                                        numberOfClients++;
-                                        break;
-                                    }
-
-                                }
-
-                                break;
-
-                            } else {
-                                /*reject clients name*/
-                                write(newClient.sockedfd, "no", 2);
-                            }
-                        }//end unique name loop
-                        ////////////////////////////////////////////////
-
-                    }//end add new client
-
-                    else {
-                        /*else there is not room, so add client to waitlist*/
-                        char message[100] = "There are already ";
-                        strcat(message, MAXCLIENTS);
-                        strcat(message," people. You are being added to the waitlist.");
-
-                        /*   waitlist   */
-                        write(newClient.sockedfd, message, strlen(message));
-
-                        newClient.connected = 1;
-                        int i;
-                        for(i = 0; i < MAXWAITLIST; i++){
-                            if(waitlist[i].connected = -1)
-                                waitlist[i] = newClient;
-                        }
-
-                    }//end add to waitlist
-                    break;
-                }//end new connection
-
-
-                else if (currentFd == 0) {
-                    /*if current fd == 0, it is the keyboard on server*/
-                    read(0, &sendLine, MAX);
-
-                    if (strcmp(sendLine, "/quit") == 0) {
-                        /*if the server types '/quit' it removes all clients and closes socket*/
-                        closeServer(clients, numberOfClients, listenFd);
-                    } else {
-                        /*else print servers message*/
-                        printf("Server  : %s",sendLine);
-                        printToClients(sendLine, clients, 0);
-                    }//end sever keyboard
-                }
-
-
-                else if (currentFd > 0) {
-                    /*The current fd is a client sending a message*/
-                    if (read(currentFd, receiveLine, MAX)) {
-                        /*if the client sends atleast 1 byte*/
-
-                        ////////////////////////////////////////////////
-                        /**use receiveLine to check if is command**/
-
-                        if (strcmp(receiveLine, "/disconnect")) {
-                            /*if client sends '/disconnect' then close its connection*/
-                            //printToClients("Client disconnected", clients, numberOfClients, "server", currentFd);
-                            clients[currentFd].connected = 0;
-                            numberOfClients--;
-                        }
-                        ////////////////////////////////////////////////
-                        else
-                            printToClients(receiveLine,clients,currentFd);
-
-                    }
-                    else {
-                        /*current client did not send data, and is disconnecting*/
-                        char msg[50];
-                        strcat(msg,"Client ");
-                        strcat(msg, currentFd);
-                        strcat(msg," disconnected");
-                        printToClients(msg, clients, currentFd);
-                        //clients[currentFd].connected = 0; need to find client with this fd
-                        numberOfClients--;
-                    }
-
-                }
-
-                break;
-                //read current fd
-
-            }//if current fd fired select
-
-        }//for
-    }//while
+	listen(listenFd, 10);
+	maxfd = listenFd;
+	
+	fd_set masterList, cmpl;
+	FD_ZERO(&masterList);
+	FD_SET(listenFd, &masterList);
+	
+	while (1) {
+		cmpl = masterList;
+		int toRead = select(maxfd + 1, &cmpl, NULL, NULL, NULL);
+		
+		/* Loops through all clients to see if any have data to be read */
+		int c = 0;
+		for (; c < MAXCLIENTS; ++c) {
+			if (clients[c].connected) {
+				if (FD_ISSET(clients[c].sockedfd, &cmpl)) {
+					/* Resets message data before being read (bzero) */
+					clearMessage(&recMessage);
+					clearMessage(&sendMessage);
+					
+					int n = readMessage(clients[c].sockedfd, &recMessage);
+					strip(recMessage.data);
+					/* client is disconnecting */	
+					if (n == 0) {
+						disconnectClient(c, clients, &masterList, &sendMessage);
+					}
+					if (isCommand(recMessage.data)) {
+						/* Fixes the command before parsing */
+						removeSpaces(recMessage.data);
+						/* Sets the command to lowercase before processing it (not everything should be lower, as otherwise names will now not allow capitals) */
+						if (strlen(recMessage.data) > 1)
+							recMessage.data[1] = tolower(recMessage.data[1]);
+						
+						if (isValidCommand(recMessage.data)) {
+							executeCommand(recMessage.data, c, clients);
+						}
+						else {
+							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_BAD_COMMAND);
+						}
+					}
+					else {
+						/* If not command, they talked and we should send that to others in the room */
+						snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+						printToOthersInRoom(clients, c, &sendMessage);
+					}
+				}
+			}
+		}
+		
+		/* Doesn't bother to continue if nothing else to read */
+		if (toRead <= 0)
+			continue;
+		
+		if (FD_ISSET(listenFd, &cmpl)) {
+			unsigned int commfd = accept(listenFd, NULL, NULL);
+			int i = 0;
+			for (; i < MAXCLIENTS; ++i) {
+				/* checking for client not in use */
+				if (clients[i].connected == 0) {
+					clients[i].connected = 1;
+					clients[i].sockedfd = commfd;
+					clients[i].roomNumber = roomStarting.id;
+					strncpy(clients[i].name, defaultName, MAX_NAME);
+					break;
+				}
+			}
+			FD_SET(commfd, &masterList);
+			
+			updateAndWriteMessage(commfd, &sendMessage, LANG_WELCOME);
+			if (commfd > maxfd)
+				maxfd = commfd;
+		}
+	}
+	
+	return 0;
 }
 
-
-
-/**
- * writes a message to all clients in the room
- * @param message message The message to be sent
- * @param roomClients The list of people in the room
- * @param sendingFD The file descriptor that is sending, and should not be sent to
- */
-void printToClients(char message[],Client * roomClients, int sendingFD){
-
-    int curClient;
-    char name[8] = "Server ";
-    for(curClient = 0; curClient < MAXCLIENTS; curClient++){
-        if(roomClients[curClient].sockedfd == sendingFD) {
-            strcpy(name,roomClients[curClient].name);
-            break;
-        }
-    }
-    char toSend[strlen(message)+8];
-    strcat(toSend,message);
-    strcat(toSend,name);
-
-    for(curClient = 0; curClient < MAXCLIENTS; curClient++){
-        if(roomClients[curClient].sockedfd != sendingFD)
-            write(roomClients[curClient].sockedfd,toSend,strlen(toSend));
-    }
-};
-
-/**
- * Closes the socket connections, and exits the program
- * @param clientlist The list of clients to disconnect
- * @param numOfClients The number of clients in the list
- * @param listenFd The servers file descriptor to close
- */
-void closeServer(Client *clientlist, int numOfClients, int listenFd) {          //needs updated
-    int currentFd;
-    char message[] = "The server is shutting down. You are being removed.";
-    for (currentFd = 0; currentFd < numOfClients; currentFd++) {
-        write(clientlist[currentFd].sockedfd, message, strlen(message));
-        close(clientlist[currentFd].sockedfd);
-        bzero(clientlist[currentFd].name, 20);
-        clientlist[currentFd].connected = 0;
-        clientlist[currentFd].sockedfd = 0;
-    }
-    close(0);
-    close(listenFd);
-    _exit(1);
+void printToAll(const Client *clients, Message *message) {
+	int i = 0;
+	for (; i < MAXCLIENTS; ++i)
+		writeMessage(clients[i].sockedfd, message);
 }
 
-/**
- * Determines if a name is unique
- * @param userName The name to check uniqueness
- * @return 1 if the name is not already on server
+void printToOthersInRoom(const Client *clients, int cur, Message *message) {
+	int i = 0;
+	for (; i < MAXCLIENTS; ++i) {
+		/* Client must be in same room, and not be the current person */
+		if (i != cur &&clients[i].roomNumber == clients[cur].roomNumber)
+			writeMessage(clients[i].sockedfd, message);
+	}
+}
+
+/*
+ * Disconnects the current client, and tells everyone in the room
  */
-int uniqueName(char userName[]) {
-    return 1;
+void disconnectClient(int cur, Client *clients, fd_set *masterList, Message *sendMessage) {
+	close(clients[cur].sockedfd);
+	clients[cur].connected = 0;
+	FD_CLR(clients[cur].sockedfd, masterList);
+	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);
+	printToOthersInRoom(clients, cur, sendMessage);
 }
