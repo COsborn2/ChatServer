@@ -26,7 +26,7 @@ int main(int argc,char **argv)
     struct sockaddr_in servaddr;
     pthread_t thread1;
     char IP[20] = "127.0.0.1"; 
-    int port = 22000;
+    uint16_t port = 22000;
     getUserName(userName);
 
 /*Take an optional IP address, or IP Address and port no. from command line*/
