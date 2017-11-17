@@ -4,6 +4,7 @@
  * void executeCommand(char * toParse) -> Run associated command
  * void makeLowerCase(char * toParse) -> Replace elements with lowercase equivalent
  * void removeSpaces(char * toParse) -> Remove spaces from passed in char array
+ * void strip(char * toParse) -> Takes in string and removes newline and tab characters
  *
  *
  * “/r” - list the rooms on the server
