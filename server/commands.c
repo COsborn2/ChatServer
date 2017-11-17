@@ -49,6 +49,16 @@ int isValidCommand(const char * toParse){
             char toTest = temporaryS[1];
 
             switch(toTest) {
+            	case 's' : //sets name
+            		if(strlen(toParse) > 2)
+            			return 1;
+            		else
+            			return 0;
+            	case 'x' : //disconnects
+            		if(strlen(toParse) == 2)
+            			return 1;
+            		else
+            			return 0;
                 case 'r' : //list the rooms on the server
                     if(strlen(toParse) == 2)
                         return 1;
@@ -100,13 +110,18 @@ int isValidCommand(const char * toParse){
 /*
  * Take in validated String with a command and run associated action
  */
-void executeCommand(const char * toParse, const int cur, Client *clients) {
+void executeCommand(const char * toParse, const int cur, Client *clients, Message *message) {
     if(isValidCommand(toParse)) {
         char temporaryS[strlen(toParse)+1];
         strcpy(temporaryS, toParse);
         char toTest = temporaryS[1];
 
         switch (toTest) {
+        	case 'x' : //disconnects
+        		disconnectClient(cur, clients, message);
+        		break;
+        	case 's' : //sets name
+        		break;
             case 'r' : //list the rooms on the server
                 //command is valid, do something
             case 'l' : //lists people in the current room

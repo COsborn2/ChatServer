@@ -43,6 +43,6 @@ void updateAndWriteMessage(int commfd, Message *message, const char *nstring);
 
 void printToAll(const Client *clients, Message *message);
 void printToOthersInRoom(const Client *clients, int cur, Message *message);
-void disconnectClient(int cur, Client *clients, fd_set *masterList, Message *sendMessage);
+void disconnectClient(int cur, Client *clients, Message *sendMessage);
 
 #endif

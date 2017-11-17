@@ -16,8 +16,8 @@
  * All the name checking code is missing, since it will need to be put with the rest of the commands
  * This part should be done, just needs the code added in case all of the client slots are full
  */
-
-void server();
+ 
+fd_set masterList;
 
 int main() {
 	char defaultName[] = DEFAULT_CLIENT_NAME;
@@ -39,7 +39,7 @@ int main() {
 	listen(listenFd, 10);
 	maxfd = listenFd;
 	
-	fd_set masterList, cmpl;
+	fd_set cmpl;
 	FD_ZERO(&masterList);
 	FD_SET(listenFd, &masterList);
 	
@@ -60,7 +60,7 @@ int main() {
 					strip(recMessage.data);
 					/* client is disconnecting */	
 					if (n == 0) {
-						disconnectClient(c, clients, &masterList, &sendMessage);
+						disconnectClient(c, clients, &sendMessage);
 					}
 					if (isCommand(recMessage.data)) {
 						/* Fixes the command before parsing */
@@ -70,7 +70,7 @@ int main() {
 							recMessage.data[1] = tolower(recMessage.data[1]);
 						
 						if (isValidCommand(recMessage.data)) {
-							executeCommand(recMessage.data, c, clients);
+							executeCommand(recMessage.data, c, clients, &sendMessage);
 						}
 						else {
 							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_BAD_COMMAND);
@@ -131,10 +131,10 @@ void printToOthersInRoom(const Client *clients, int cur, Message *message) {
 /*
  * Disconnects the current client, and tells everyone in the room
  */
-void disconnectClient(int cur, Client *clients, fd_set *masterList, Message *sendMessage) {
+void disconnectClient(int cur, Client *clients, Message *sendMessage) {
 	close(clients[cur].sockedfd);
 	clients[cur].connected = 0;
-	FD_CLR(clients[cur].sockedfd, masterList);
+	FD_CLR(clients[cur].sockedfd, &masterList);
 	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);
 	printToOthersInRoom(clients, cur, sendMessage);
 }
