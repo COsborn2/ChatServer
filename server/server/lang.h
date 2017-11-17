@@ -4,6 +4,7 @@
 #define LANG_WELCOME "Welcome to E-Chat."
 #define LANG_DISCONNECT "%s has left the room."
 #define LANG_BAD_COMMAND "No command matches your input"
+#define LANG_NO_TALK "Please join a room before talking using the /r command."
 
 #define LANG_HELP_1 "  \"/r\" - list the rooms on the server"
 #define LANG_HELP_2 "  \"/l\" - lists people in the current room"

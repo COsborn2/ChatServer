@@ -78,8 +78,13 @@ int main() {
 					}
 					else {
 						/* If not command, they talked and we should send that to others in the room */
-						snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
-						printToOthersInRoom(clients, c, &sendMessage);
+						if (clients[c].roomId != roomStarting.id) {
+							snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+							printToOthersInRoom(clients, c, &sendMessage);
+						}
+						else {
+							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
+						}
 					}
 				}
 			}
