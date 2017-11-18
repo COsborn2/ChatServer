@@ -17,12 +17,11 @@ int main(int argc, char** argv){
             printf("Filesize of \"%s\": %i\n", param, fileSize(param));
             break;
         case 3:
-
             if((fd = open("test.txt", O_RDONLY)) < 0)
             {  fprintf(stderr, "Open error: test.txt\n");
                 return -1; //send failed
             }
-            recFile(fd);
+            recFile("/f0060",fd);
             close(fd);
             break;
         default:
