@@ -19,6 +19,12 @@ void removeSpaces(char * toParse);
 void strip(char * toParse);
 
 void executeRoomList(const int cur, const Client *clients, Message *message);
+void executeClientList();
+void executeDisconnect();
+void executeExitRoom();
 void executeHelp(const int cur, const Client *clients, Message *message);
+void executePrivateChat();
+void executeSendFile();
+void setClientName();
 
 #endif
