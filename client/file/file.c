@@ -1,16 +1,20 @@
 #include "file.h"
 
 
-/* Description: finds size of file in bytes, writes to fd an unsigned int representing
- *              filesize, followed by filename, followed by the file's contents.
- * Accepts:     A char* representing the filename, and an int file descriptor to write to.
+/* Description: Given initial char* containing /f, finds size of file in bytes, 
+ *				writes to sd an unsigned int representing filesize, 
+ *				followed by filename, followed by the file's contents.
+ * Accepts:     Initial char*, int file/socket descriptor.
  * Returns:     1 on successful send, 0 on failure
  */
 
-int sendFile(char* fileName, int sd){
-
-    if(strlen(fileName) > 8){
-        fprintf(stderr,"Filename is too long:%s\n", fileName);
+int sendFile(char* initStr, int sd){
+	//increment past "/f "
+	if(initStr[2] == ' '){initStr +=3;}
+	else{initStr +=2;}
+	
+    if(strlen(initStr) > 8){
+        fprintf(stderr,"Filename is too long:%s\n", initStr);
         return 0; //send failed
     }
 
@@ -19,9 +23,9 @@ int sendFile(char* fileName, int sd){
     char buffer[256];
 
 
-    if((fd = open(fileName, O_RDONLY)) < 0)
+    if((fd = open(initStr, O_RDONLY)) < 0)
     {
-        fprintf(stderr, "Open error: %s\n", fileName);
+        fprintf(stderr, "Open error: %s\n", initStr);
         return 0; //send failed
     }
 
@@ -32,11 +36,11 @@ int sendFile(char* fileName, int sd){
 
     //write file info to socket
     size = htonl(size);
-    //write(sd, &size, sizeof(size));
-    dprintf(sd, "%4i", size);
-
-    sprintf(buffer, "%s", fileName);
+	dprintf(sd, "/f%4i", size);
+	bzero(buffer, 256);
+    strncpy(buffer,initStr, strlen(initStr));
     write(sd, &buffer, 8);
+	
     bzero(buffer, 256);
     //reads until eof, writes to client
     while(read(fd,&buffer,256)){
@@ -67,47 +71,55 @@ unsigned int fileSize(char* fileName){
     return size;
 }
 
-/* Description:  Given a void* representing a socket file descriptor, reads file info and creates a file on the local disk.
+/* Description:  Given a char* representing initial string containing /f, reads file info and creates a file on the local disk.
  *               Reads/Writes from socket to file.
- *               Intended to be threaded.
  * Accepts:      Char* string to parse
- * Returns:      unsigned int representing file size.
+ * Returns:      Int success/failure (1/0).
  */
-int recFile(int sd)
+int recFile(char * initStr, int sd)
     {
+		//increment past "/f "
+		if(initStr[2] == ' '){initStr +=3;}
+		else{initStr +=2;}
+		
         int x, fd;
         char temp[256];
         unsigned long fsize = 0;
 
         bzero(temp, 256);
-        //Read 2 bytes for /f
-        read(sd, temp, 2);
-        bzero(temp, 256);
-
-        read(sd, &temp, 4);
+		
+		//retrieve filesize
+        strncpy(temp, initStr, 4);
         fsize= strtoul(temp, 0, 10);
-        printf("Debug-fname: %i", fsize);
+		
+		//TODO
+        printf("Debug-fname: %lu\n", fsize);
 
         //read filename
         bzero(temp, 256);
         read(sd, temp, 8);
-        temp[8] = '\0';
+		
         //Attempts to create file
         if((fd = open(temp, O_WRONLY | O_CREAT, 0666)) < 0)
         {  fprintf(stderr, "\nOpen/Create error: %s\n", temp);
             return 0; //read failed
         }
+        //TODO
+        printf("Opened/created file %s for writing. \n", temp);
 
         //remaining bytes should be file contents
         x=0;
-        int test;
+        ssize_t rd= 0;
         while(x < fsize) {
             bzero( &temp, 256);
-            test = read(sd,&temp,256);
-            temp[test]='\0';
+            rd = read(sd,&temp,256);
             write(fd,&temp, 256);
-            x= x + 256;
+            x+= 1+ rd;
         }
+
+        //TODO
+        printf("File Write Complete. \n");
+
         close(fd);
         return 1;    //write success
     }
