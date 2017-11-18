@@ -29,10 +29,10 @@ typedef struct {
 	char data[MAX];
 } Message;
 
-const Room roomStarting = {-1, "The Void"};
-const Room roomHobby = {330, "Hobby"};
-const Room roomNetwork = {340, "Network"};
-const int default_room_count = 2;
+extern const Room roomStarting;
+extern const Room roomHobby;
+extern const Room roomNetwork;
+extern const int default_room_count;
 extern const Room *def_rooms[2];
 
 void clearMessage(Message *message);

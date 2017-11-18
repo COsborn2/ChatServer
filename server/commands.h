@@ -14,10 +14,11 @@
 int isCommand(const char * toParse);
 int isValidCommand(const char * toParse);
 void makeLowerCase(char * toParse);
-void executeCommand(const char * toParse, const int cur, Client *clients, Message *message));
+void executeCommand(const char * toParse, const int cur, Client *clients, Message *message);
 void removeSpaces(char * toParse);
 void strip(char * toParse);
 
-void executeHelp(const int cur, const Client *client);
+void executeRoomList(const int cur, const Client *clients, Message *message);
+void executeHelp(const int cur, const Client *clients, Message *message);
 
 #endif

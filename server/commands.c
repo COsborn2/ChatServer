@@ -1,4 +1,5 @@
 #include "commands.h"
+#include "lang.h"
 
 /*
  * int isCommand(char * toParse) -> Return 1 if true, 0 if false.
@@ -50,55 +51,23 @@ int isValidCommand(const char * toParse){
 
             switch(toTest) {
             	case 's' : //sets name
-            		if(strlen(toParse) > 2)
-            			return 1;
-            		else
-            			return 0;
-            	case 'x' : //disconnects
-            		if(strlen(toParse) == 2)
-            			return 1;
-            		else
-            			return 0;
+            		return strlen(toParse) > 2;
                 case 'r' : //list the rooms on the server
-                    if(strlen(toParse) == 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) == 2;
                 case 'l' : //lists people in the current room
-                    if(strlen(toParse) == 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) == 2;
                 case 'x' : //close the connection and log off the server
-                    if(strlen(toParse) == 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) == 2;
                 case 'q' : //end private chat
-                    if(strlen(toParse) == 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) == 2;
                 case 'h' : //help
-                    if(strlen(toParse) == 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) == 2;
                 case 'p' : //private chat
-                    if(strlen(toParse) > 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) > 2;
                 case 'j' : //joins the given room
-                    if(strlen(toParse) > 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) > 2;
                 case 'f' : //send file
-                    if(strlen(toParse) > 2)
-                        return 1;
-                    else
-                        return 0;
+                    return strlen(toParse) > 2;
                 default : //doesn't match any command
                     return 0;
             }
@@ -123,19 +92,27 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
         	case 's' : //sets name
         		break;
             case 'r' : //list the rooms on the server
-                //command is valid, do something
+            	executeRoomList(cur, clients, message);
+            	break;
             case 'l' : //lists people in the current room
                 //command is valid, do something
+                break;
             case 'q' : //end private chat
                 //command is valid, do something
+                break;
             case 'h' : //help
-            	executeHelp(cur, clients);
+            	executeHelp(cur, clients, message);
+            	break;
             case 'p' : //private chat
                 //command is valid, do something
+                break;
             case 'j' : //joins the given room
                 //command is valid, do something
+                executeJoinRoom(cur, clients, message, toParse + 2);
+                break;
             case 'f' : //send file
                 //command is valid, do something
+                break;
             default : //doesn't match any command
                 break;
         }
@@ -189,10 +166,3 @@ void strip(char * toParse) {
         }// end while
     }
 }// end strip
-
-/*
- * Sends the client the "help" text
- */
-void executeHelp(const int cur, const Client *client) {
-
-}
