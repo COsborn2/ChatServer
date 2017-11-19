@@ -95,7 +95,7 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
         		disconnectClient(cur, clients, message);
         		break;
         	case 's' : //sets name
-                setClientName(cur, clients, message, noSpaces + 2);
+                setClientName(cur, clients, noSpaces + 2);
         		break;
             case 'r' : //list the rooms on the server
             	executeRoomList(cur, clients, message);
@@ -113,7 +113,7 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
                 executePChat(cur, clients, message);
                 break;
             case 'j' : //joins the given room
-                executeJoinRoom(cur, clients, message, noSpaces + 2);
+                executeJoinRoom(cur, clients, noSpaces + 2);
                 break;
             case 'f' : //send file
                 //command is valid, do something

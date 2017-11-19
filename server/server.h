@@ -15,7 +15,7 @@
 
 #define MAXCLIENTS 30
 #define MAX 100
-#define MAXWAITLIST 5
+#define MAX_ROOM_SIZE 3
 
 #define MAX_NAME 8
 #define MAX_ROOM_NAME_LENGTH 16
