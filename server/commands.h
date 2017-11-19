@@ -18,13 +18,11 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
 void removeSpaces(char * toParse);
 void strip(char * toParse);
 
-void executeRoomList(const int cur, const Client *clients, Message *message);
-void executeClientList();
-void executeDisconnect();
-void executeExitRoom();
-void executeHelp(const int cur, const Client *clients, Message *message);
-void executePrivateChat();
-void executeSendFile();
-void setClientName();
+void executeRoomList(const int cur, const Client *clients, Message *message); // "/r"
+void executeClientList(const int cur, const Client * clients, Message * message); // "/r"
+void executeExitRoom(const int cur, const Client * clients, Message * message); // "/q"
+void joinRoom(const int cur, const Client * clients, Message * message); // "j roomName"
+void executeHelp(const int cur, const Client *clients, Message *message); // "/h"
+void setClientName(const int cur, const Client * clients, Message * message); // "/s name"
 
 #endif

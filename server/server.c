@@ -142,4 +142,5 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
 	FD_CLR(clients[cur].sockedfd, &masterList);
 	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);
 	printToOthersInRoom(clients, cur, sendMessage);
+    strcpy(clients[cur].name, DEFAULT_CLIENT_NAME); //set client name back to default
 }
