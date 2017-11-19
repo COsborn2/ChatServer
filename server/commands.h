@@ -20,5 +20,6 @@ void strip(char * toParse);
 
 void executeRoomList(const int cur, const Client *clients, Message *message);
 void executeHelp(const int cur, const Client *clients, Message *message);
-
+void executePChat(const int cur, Client *clients, Message *message);
+void executeEndPChat(const int cur, Client *clients);
 #endif
