@@ -5,8 +5,11 @@
 #define LANG_DISCONNECT "%s has left the room."
 #define LANG_BAD_COMMAND "No command matches your input"
 #define LANG_NO_TALK "Please join a room before talking using the /r command."
-#define NAME_TAKEN "That name is already taken."
-#define NO_SUCH_ROOM "No room with that name exists."
+#define LANG_NAME_TAKEN "That name is already taken."
+#define LANG_NO_SUCH_ROOM "No room with that name exists."
+#define LANG_ROOM_FULL "The room is full, try connecting later."
+#define LANG_DEFAULT_NAME "You cannot join a room with no name, use the /s command to change it."
+#define LANG_PRIVATE_CHAT "You are no longer in private chat, all messages will be PUBLIC."
 
 #define LANG_HELP_1 "  \"/r\" - list the rooms on the server"
 #define LANG_HELP_2 "  \"/l\" - lists people in the current room"

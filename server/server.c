@@ -15,7 +15,6 @@ int main() {
 	memset(clients, 0, MAXCLIENTS * sizeof(Client));
 	Message recMessage;
 	Message sendMessage;
-	const PrivChat *priv_Chats[MAXCLIENTS/2];
 
 	unsigned int listenFd, maxfd;
 	struct sockaddr_in svaddr;
@@ -69,11 +68,11 @@ int main() {
 					}
 					else {
 						/* If not command, they talked and we should send that to others in the room */
-						if (clients[c].roomId != roomStarting.id) {
+						if (clients[c].roomNumber != roomStarting.id) {
 							//if in priv chat, send only to other client
 							if(clients[c].privChat >= 0) {
 								snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
-								writeMessage(clients[c].privChat, &recMessage);
+								writeMessage(clients[c].privChat, &sendMessage);
 							}
 							else{
 								snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
@@ -101,6 +100,7 @@ int main() {
 					clients[i].connected = 1;
 					clients[i].sockedfd = commfd;
 					clients[i].roomNumber = roomStarting.id;
+                    clients[i].privChat = -1;
 					strncpy(clients[i].name, defaultName, MAX_NAME);
 					break;
 				}
@@ -135,6 +135,19 @@ void printToOthersInRoom(const Client *clients, int cur, Message *message) {
  * Disconnects the current client, and tells everyone in the room
  */
 void disconnectClient(int cur, Client *clients, Message *sendMessage) {
+    /*if client is in private chat, it removes the other person, and notifies them they are public*/
+    if(clients[cur].privChat >= 0){
+        int i = 0;
+        for(; i < MAXCLIENTS; i++){
+            if(clients[i].privChat == cur){
+                clients[i].privChat = -1;
+                updateAndWriteMessage(i,sendMessage, LANG_PRIVATE_CHAT);
+                break;
+            }
+        }
+    }
+
+    /*closes socket and client*/
 	close(clients[cur].sockedfd);
 	clients[cur].connected = 0;
 	FD_CLR(clients[cur].sockedfd, &masterList);

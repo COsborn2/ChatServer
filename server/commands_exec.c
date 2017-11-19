@@ -1,5 +1,4 @@
 #include "commands.h"
-#include "server.h"
 
 /*
  * Sends the client the available rooms
@@ -11,6 +10,7 @@ void executeRoomList(const int cur, const Client *clients, Message *message) {
 		writeMessage(clients[cur].sockedfd, message);
 	}
 }
+
 
 /*
  * Sends the client the "help" text
@@ -27,56 +27,100 @@ void executeHelp(const int cur, const Client *clients, Message *message) {
 	updateAndWriteMessage(clients[cur].sockedfd, message, LANG_HELP_9);
 }
 
+
 /*
  * /l
  * Iterates through all the clients and prints all clients in current room
  */
 void executeClientList(const int cur, const Client * clients, Message * message){
     int i = 0;
-    for(; clients[i] != '\0' && clients[i].roomNumber == clients[cur].roomNumber; i++){
-        updateAndWriteMessage(clients[cur].sockedfd, message,clients[i].name);
+    int roomToPrint = clients[cur].roomNumber;
+    for(; i < MAXCLIENTS; i++){
+        if( clients[i].roomNumber == roomToPrint)
+            updateAndWriteMessage(clients[cur].sockedfd, message,clients[i].name);
     }
 }
+
 
 /*
  * /j roomName
  * Puts user in a room
  */
-void executeJoinRoom(const int cur, const Client * clients, Message * message, char * toParse){
-    int roomExists = 0;
+void executeJoinRoom(const int cur, Client * clients, char * toParse){
+    Message *message;
 
-    int i = 0;
-    for(; def_rooms[i] != '\0'; i++){
-        if(def_rooms[i]->name == toParse) {
-            clients[cur].roomNumber = def_rooms[i]->id;
-            roomExists = 1;
+    /*user cannot join a room with the default name*/
+    if(strcmp(clients[cur].name, DEFAULT_CLIENT_NAME) == 0){
+        updateAndWriteMessage(cur,message, LANG_DEFAULT_NAME);
+        return;
+    }
+
+    int roomIndex = -1, i = 0;
+
+    /*verify if its a valid room*/
+    for(; i < default_room_count; i++){
+        if(strcmp(def_rooms[i]->name, toParse) == 0) {
+            roomIndex = i;
+            break;
         }
     }
-    if(roomExists == 0){
-        updateAndWriteMessage(clients[cur].sockedfd, message, NO_SUCH_ROOM);
+    if(roomIndex == -1){
+        /*room is invalid*/
+        updateAndWriteMessage(clients[cur].sockedfd, message, LANG_NO_SUCH_ROOM);
     }
+    else{
+
+        /*counts the number of people in the room, adds client to the room if not full*/
+        int numberOfClients = 0;
+        i=0;
+        for(; i < MAXCLIENTS; i++){
+            if(clients[i].roomNumber == def_rooms[roomIndex]->id)
+                numberOfClients++;
+        }
+
+        /*either adds client to room, or informs client that the room is full*/
+        if(numberOfClients < MAX_ROOM_SIZE) {
+            clients[cur].roomNumber = def_rooms[roomIndex]->id;
+            snprintf(message->data, MAX, "%s has joined %s", clients[cur].name, def_rooms[roomIndex]->name);
+            printToOthersInRoom(clients,cur,message);
+
+        }
+        else {
+            updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_ROOM_FULL);
+        }
+    }
+
 }
+
 
 /*
  * /s name
  * Takes prompt for username. If name is already taken tells user and exits
  */
-void setClientName(const int cur, const Client * clients, Message * message, char * toParse){
+void setClientName(const int cur, Client * clients, char * suggestedName){
     int taken = 0;
 
     //make sure client name is not taken
     int i = 0;
-    for(; clients[i] != '\0'; i++){
-        if(toParse == clients[i].name)
+    for(; i < MAXCLIENTS; i++){
+        if(suggestedName == clients[i].name) {
             taken = 1;
+            break;
+        }
     }
 
+    Message *message;
     if(taken != 1){
-        strcpy(clients[cur].name, toParse);
-    }else{ //name taken, retry
-        updateAndWriteMessage(clients[cur].sockedfd, message, NAME_TAKEN);
+        strncpy(clients[cur].name, suggestedName, MAX_NAME);
+        snprintf(message->data, MAX, "Welcome %s", clients[cur].name);
+        writeMessage(cur,message);
+    }
+    else{ //name taken, retry
+        updateAndWriteMessage(clients[cur].sockedfd, message, LANG_NAME_TAKEN);
     }
 }
+
+
  /*
  * Opens a private chat between cur and specified user
  */
@@ -116,6 +160,10 @@ void executePChat(const int cur, Client *clients, Message *message) {
 	dprintf(clients[cur].sockedfd, "\nServer: Could not find user with that name.\n");
 }
 
+
+ /*
+ * end private chat
+ */
 void executeEndPChat(const int cur, Client *clients) {
 
 	//not in a priv chat
