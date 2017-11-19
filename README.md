@@ -13,7 +13,7 @@ commands:\
 “/q” - end private chat\
 “/f” filename - send file\
 “/h” - help \
-Sample client session: \
+Sample client session:
 > ./a.out\
 > Enter your name: Tom  //You type Tom\
 > Welcome to E-Chat. //From the server\
@@ -55,8 +55,7 @@ Chat session\
 \ 
 Server:\
 \
-For a character string received not beginning with '/', it is within-room broadcast.\ 
-Else it is a command.\
+For a character string received not beginning with '/', it is within-room broadcast. Else it is a command.\
 \
 case command\
 “/r” //Send room names, "Hobby 330" (if the server has Hobby and 330 rooms)\
