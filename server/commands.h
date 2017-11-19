@@ -23,6 +23,6 @@ void executeClientList(const int cur, const Client * clients, Message * message)
 void executeExitRoom(const int cur, const Client * clients, Message * message); // "/q"
 void joinRoom(const int cur, const Client * clients, Message * message); // "j roomName"
 void executeHelp(const int cur, const Client *clients, Message *message); // "/h"
-void setClientName(const int cur, const Client * clients, Message * message); // "/s name"
+void setClientName(const int cur, const Client * clients, Message * message, char * toParse); // "/s name"
 
 #endif

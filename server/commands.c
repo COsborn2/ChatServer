@@ -47,6 +47,7 @@ int isValidCommand(const char * toParse){
 
             char temporaryS[strlen(toParse)+1];
             strcpy(temporaryS, toParse);
+            makeLowerCase(temporaryS);
             char toTest = temporaryS[1];
 
             switch(toTest) {
@@ -83,19 +84,24 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
     if(isValidCommand(toParse)) {
         char temporaryS[strlen(toParse)+1];
         strcpy(temporaryS, toParse);
+        makeLowerCase(temporaryS);
         char toTest = temporaryS[1];
+
+        char noSpaces[strlen(toParse)+1];
+        strcpy(noSpaces, toParse);
 
         switch (toTest) {
         	case 'x' : //disconnects
         		disconnectClient(cur, clients, message);
         		break;
         	case 's' : //sets name
+                setClientName(cur, clients, message, noSpaces + 2);
         		break;
             case 'r' : //list the rooms on the server
             	executeRoomList(cur, clients, message);
             	break;
             case 'l' : //lists people in the current room
-                //command is valid, do something
+                executeClientList(cur, clients, message);
                 break;
             case 'q' : //end private chat
                 //command is valid, do something
@@ -107,8 +113,7 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
                 //command is valid, do something
                 break;
             case 'j' : //joins the given room
-                //command is valid, do something
-                executeJoinRoom(cur, clients, message, toParse + 2);
+                executeJoinRoom(cur, clients, message, noSpaces + 2);
                 break;
             case 'f' : //send file
                 //command is valid, do something

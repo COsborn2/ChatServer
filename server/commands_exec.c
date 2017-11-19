@@ -28,67 +28,52 @@ void executeHelp(const int cur, const Client *clients, Message *message) {
 }
 
 /*
- * /r
- * Iterates through all the clients and prints all clients
+ * /l
+ * Iterates through all the clients and prints all clients in current room
  */
 void executeClientList(const int cur, const Client * clients, Message * message){
     int i = 0;
-    for(; clients[i] != '\0'; i++){
+    for(; clients[i] != '\0' && clients[i].roomNumber == clients[cur].roomNumber; i++){
         writeMessage(clients[cur].sockedfd, clients[i].name);
     }
 }
 
 /*
- * /q
- * Remove client from whatever room they are currently in.
- */
-void executeExitRoom(const int cur, const Client * clients, Message * message){
-    clients[cur].roomNumber = -1;
-}
-
-/*
  * /j roomName
- *
+ * Puts user in a room
  */
-void joinRoom(const int cur, const Client * clients, Message * message){
-    removeSpaces(message->data);
-    char temp[strlen(message->data)];
-    int startIndex = 2;
-    int endIndex = strlen(message->data)-1;
-
-    strncpy(temp+startIndex, message->data, endIndex-startIndex);
+void executeJoinRoom(const int cur, const Client * clients, Message * message, char * toParse){
+    int roomExists = 0;
 
     int i = 0;
-    for(; i[def_rooms] != '\0'; i++){
-        if(def_rooms[i]->name == temp)
+    for(; def_rooms[i] != '\0'; i++){
+        if(def_rooms[i]->name == toParse) {
             clients[cur].roomNumber = def_rooms[i]->id;
+            roomExists = 1;
+        }
+    }
+    if(roomExists == 0){
+        writeMessage(clients[cur].sockedfd, NO_SUCH_ROOM);
     }
 }
 
 /*
  * /s name
- *
+ * Takes prompt for username. If name is already taken tells user and exits
  */
-void setClientName(const int cur, const Client * clients, Message * message){
-    removeSpaces(message->data);
-    char requestedName[strlen(message->data)];
-    int startIndex = 2;
-    int endIndex = strlen(message->data)-1;
-
-    strncpy(requestedName+startIndex, message->data, endIndex-startIndex);
-
+void setClientName(const int cur, const Client * clients, Message * message, char * toParse){
     int taken = 0;
 
     //make sure client name is not taken
     int i = 0;
     for(; clients[i] != '\0'; i++){
-        if(requestedName == clients[i].name)
+        if(toParse == clients[i].name)
             taken = 1;
     }
 
     if(taken != 1){
-        strcpy(clients[cur].name, requestedName);
+        strcpy(clients[cur].name, toParse);
     }else{ //name taken, retry
-        //retry getting a name
+        writeMessage(clients[cur].sockedfd, NAME_TAKEN);
     }
 }
