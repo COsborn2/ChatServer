@@ -51,8 +51,7 @@ Server-Client transaction\
 \
 After accept(), the server sends “ok” (2 bytes) to the client. The client upon receipt of “ok” sends the client's user name in 8 bytes. Server sends “ok” (2 bytes) to the client, signaling the client is entered in the client list and ready for the chat session.\
 \
-Chat session\
-\ 
+Chat session\ 
 Server:\
 \
 For a character string received not beginning with '/', it is within-room broadcast. Else it is a command.\
