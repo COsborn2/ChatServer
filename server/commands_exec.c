@@ -51,9 +51,10 @@ void executeExitRoom(const int cur, const Client * clients, Message * message){
  *
  */
 void joinRoom(const int cur, const Client * clients, Message * message){
+    removeSpaces(message->data);
     char temp[strlen(message->data)];
-    int startIndex;
-    int endIndex;
+    int startIndex = 2;
+    int endIndex = strlen(message->data)-1;
 
     strncpy(temp+startIndex, message->data, endIndex-startIndex);
 
@@ -69,5 +70,25 @@ void joinRoom(const int cur, const Client * clients, Message * message){
  *
  */
 void setClientName(const int cur, const Client * clients, Message * message){
-    
+    removeSpaces(message->data);
+    char requestedName[strlen(message->data)];
+    int startIndex = 2;
+    int endIndex = strlen(message->data)-1;
+
+    strncpy(requestedName+startIndex, message->data, endIndex-startIndex);
+
+    int taken = 0;
+
+    //make sure client name is not taken
+    int i = 0;
+    for(; clients[i] != '\0'; i++){
+        if(requestedName == clients[i].name)
+            taken = 1;
+    }
+
+    if(taken != 1){
+        strcpy(clients[cur].name, requestedName);
+    }else{ //name taken, retry
+        //retry getting a name
+    }
 }
