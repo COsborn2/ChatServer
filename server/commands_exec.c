@@ -34,7 +34,7 @@ void executeHelp(const int cur, const Client *clients, Message *message) {
 void executeClientList(const int cur, const Client * clients, Message * message){
     int i = 0;
     for(; clients[i] != '\0' && clients[i].roomNumber == clients[cur].roomNumber; i++){
-        writeMessage(clients[cur].sockedfd, clients[i].name);
+        updateAndWriteMessage(clients[cur].sockedfd, message,clients[i].name);
     }
 }
 
@@ -53,7 +53,7 @@ void executeJoinRoom(const int cur, const Client * clients, Message * message, c
         }
     }
     if(roomExists == 0){
-        writeMessage(clients[cur].sockedfd, NO_SUCH_ROOM);
+        updateAndWriteMessage(clients[cur].sockedfd, message, NO_SUCH_ROOM);
     }
 }
 
@@ -74,6 +74,6 @@ void setClientName(const int cur, const Client * clients, Message * message, cha
     if(taken != 1){
         strcpy(clients[cur].name, toParse);
     }else{ //name taken, retry
-        writeMessage(clients[cur].sockedfd, NAME_TAKEN);
+        updateAndWriteMessage(clients[cur].sockedfd, message, NAME_TAKEN);
     }
 }
