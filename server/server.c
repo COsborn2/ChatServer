@@ -1,14 +1,4 @@
-#include <arpa/inet.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
-#include "commands.h"
-#include "lang.h"
 #include "server.h"
 
 /*
@@ -25,7 +15,8 @@ int main() {
 	memset(clients, 0, MAXCLIENTS * sizeof(Client));
 	Message recMessage;
 	Message sendMessage;
-	
+	const PrivChat *priv_Chats[MAXCLIENTS/2];
+
 	unsigned int listenFd, maxfd;
 	struct sockaddr_in svaddr;
 	
@@ -79,8 +70,15 @@ int main() {
 					else {
 						/* If not command, they talked and we should send that to others in the room */
 						if (clients[c].roomId != roomStarting.id) {
-							snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
-							printToOthersInRoom(clients, c, &sendMessage);
+							//if in priv chat, send only to other client
+							if(clients[c].privChat >= 0) {
+								snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+								writeMessage(clients[c].privChat, &recMessage);
+							}
+							else{
+								snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+								printToOthersInRoom(clients, c, &sendMessage);
+							}
 						}
 						else {
 							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
@@ -144,3 +142,4 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
 	printToOthersInRoom(clients, cur, sendMessage);
     strcpy(clients[cur].name, DEFAULT_CLIENT_NAME); //set client name back to default
 }
+

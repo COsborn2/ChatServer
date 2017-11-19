@@ -104,13 +104,13 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
                 executeClientList(cur, clients, message);
                 break;
             case 'q' : //end private chat
-                //command is valid, do something
+                executeEndPChat(cur, clients);
                 break;
             case 'h' : //help
             	executeHelp(cur, clients, message);
             	break;
             case 'p' : //private chat
-                //command is valid, do something
+                executePChat(cur, clients, message);
                 break;
             case 'j' : //joins the given room
                 executeJoinRoom(cur, clients, message, noSpaces + 2);

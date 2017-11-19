@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include "file/file.h"
 
 #define NAMELENGTH 8
 
@@ -17,7 +18,8 @@
  Authors: Kenneth White, Casey White, Cameron Osborne, Andy Robinson
  */
 void *readT(void *sockfd);
-void getUserName(char userName[]); 
+void getUserName(char userName[]);
+int containsFileT(char* str);
 
 int main(int argc,char **argv)
 {   
@@ -49,28 +51,36 @@ int main(int argc,char **argv)
 
     read(sockfd, ack, 2);
     if(strcmp(ack, "ok") == 0){
-	while(1){
-    	    write(sockfd, userName, NAMELENGTH);
-	    bzero(ack, 2);
-	    read(sockfd, ack, 2);
-	    if(strcmp(ack, "ok") == 0){
-	       // pthread_create(&thread1, NULL, readT, &sockfd);
+        while(1){
+            write(sockfd, userName, NAMELENGTH);
+            bzero(ack, 2);
+            read(sockfd, ack, 2);
+            if(strcmp(ack, "ok") == 0){
+               // pthread_create(&thread1, NULL, readT, &sockfd);
 
-		/*Takes input from client, writes to server and echoes to terminal*/
-	        while(1)
-	        {   bzero( sendline, 100);   //clean char arrays
-		    printf("\nEnter String to send to Server: ");
-		    fgets(sendline,100,stdin);  //gets input
-		    write(sockfd,sendline,strlen(sendline)+1); 
-		    write(1, sendline,strlen(sendline)+1);
-	        }
-	    }
-	    else{
-	        printf("Entered username is not unique\n");
-		getUserName(userName);
-	    }
-	}
-    }
+            /*Takes input from client, writes to server and echoes to terminal*/
+                while(1)
+                {   bzero( sendline, 100);   //clean char arrays
+                printf("\nEnter String to send to Server: ");
+                fgets(sendline,100,stdin);  //gets input
+
+                if(containsFileT(sendline)){
+                    if(sendFile(sendline, sockfd)){
+                        printf("\nFile Sent Successfully.");
+                    }
+                    else{printf("\nFile failed to send.");}
+                }
+
+                write(sockfd,sendline,strlen(sendline)+1);
+                write(1, sendline,strlen(sendline)+1);
+                }
+            }
+            else{
+                printf("Entered username is not unique\n");
+                getUserName(userName);
+            }
+        }//while 1
+    }//if
     close(sockfd);
 }
 
@@ -83,9 +93,14 @@ void *readT(void *sockfd)
    
     while(1){
     bzero( recvline, 100);
-    tst = read(sd,recvline,100);  //recieve
-        if(tst >0)
-        printf("\n%s",recvline);
+    tst = read(sd,recvline,100);  //receive
+        if(tst >0){
+            printf("\n%s",recvline);
+            if(containsFileT(recvline)){
+                recFile(recvline, sd);
+            }
+        }
+
     }
 
     return (NULL);
@@ -101,4 +116,13 @@ void getUserName(char userName[])
 	temp[strcspn(temp, "\n")] = '\0';//remove newline
     }while(strlen(temp) > NAMELENGTH);
     strncpy(userName, temp, NAMELENGTH);
+}
+
+int containsFileT(char* str){
+    if(str != NULL && strlen(str) >= 2){
+        if(str[0] == '/') {
+            return  str[1] == 'f';
+        }
+    }
+    return 0;
 }

@@ -11,6 +11,6 @@
 
 
 
-int sendFile(char* fileName, int sd);
+int sendFile(char* initStr, int sd);
 unsigned int fileSize(char* fileName);
-int recFile(int sd);
+int recFile(char* initStr, int sd);
