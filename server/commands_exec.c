@@ -28,6 +28,56 @@ void executeHelp(const int cur, const Client *clients, Message *message) {
 }
 
 /*
+ * /l
+ * Iterates through all the clients and prints all clients in current room
+ */
+void executeClientList(const int cur, const Client * clients, Message * message){
+    int i = 0;
+    for(; clients[i] != '\0' && clients[i].roomNumber == clients[cur].roomNumber; i++){
+        updateAndWriteMessage(clients[cur].sockedfd, message,clients[i].name);
+    }
+}
+
+/*
+ * /j roomName
+ * Puts user in a room
+ */
+void executeJoinRoom(const int cur, const Client * clients, Message * message, char * toParse){
+    int roomExists = 0;
+
+    int i = 0;
+    for(; def_rooms[i] != '\0'; i++){
+        if(def_rooms[i]->name == toParse) {
+            clients[cur].roomNumber = def_rooms[i]->id;
+            roomExists = 1;
+        }
+    }
+    if(roomExists == 0){
+        updateAndWriteMessage(clients[cur].sockedfd, message, NO_SUCH_ROOM);
+    }
+}
+
+/*
+ * /s name
+ * Takes prompt for username. If name is already taken tells user and exits
+ */
+void setClientName(const int cur, const Client * clients, Message * message, char * toParse){
+    int taken = 0;
+
+    //make sure client name is not taken
+    int i = 0;
+    for(; clients[i] != '\0'; i++){
+        if(toParse == clients[i].name)
+            taken = 1;
+    }
+
+    if(taken != 1){
+        strcpy(clients[cur].name, toParse);
+    }else{ //name taken, retry
+        updateAndWriteMessage(clients[cur].sockedfd, message, NAME_TAKEN);
+    }
+}
+ /*
  * Opens a private chat between cur and specified user
  */
 void executePChat(const int cur, Client *clients, Message *message) {

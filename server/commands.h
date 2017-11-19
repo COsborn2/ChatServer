@@ -18,8 +18,18 @@ void executeCommand(const char * toParse, const int cur, Client *clients, Messag
 void removeSpaces(char * toParse);
 void strip(char * toParse);
 
+
+void executeRoomList(const int cur, const Client *clients, Message *message); // "/r"
+void executeClientList(const int cur, const Client * clients, Message * message); // "/r"
+void executeExitRoom(const int cur, const Client * clients, Message * message); // "/q"
+void joinRoom(const int cur, const Client * clients, Message * message); // "j roomName"
+void executeHelp(const int cur, const Client *clients, Message *message); // "/h"
+void setClientName(const int cur, const Client * clients, Message * message, char * toParse); // "/s name"
+
+
 void executeRoomList(const int cur, const Client *clients, Message *message);
 void executeHelp(const int cur, const Client *clients, Message *message);
 void executePChat(const int cur, Client *clients, Message *message);
 void executeEndPChat(const int cur, Client *clients);
+
 #endif

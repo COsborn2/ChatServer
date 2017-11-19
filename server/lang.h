@@ -5,6 +5,8 @@
 #define LANG_DISCONNECT "%s has left the room."
 #define LANG_BAD_COMMAND "No command matches your input"
 #define LANG_NO_TALK "Please join a room before talking using the /r command."
+#define NAME_TAKEN "That name is already taken."
+#define NO_SUCH_ROOM "No room with that name exists."
 
 #define LANG_HELP_1 "  \"/r\" - list the rooms on the server"
 #define LANG_HELP_2 "  \"/l\" - lists people in the current room"
