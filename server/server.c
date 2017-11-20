@@ -73,7 +73,7 @@ int main() {
 					clearMessage(&sendMessage);
 					
 					int n = readMessage(clients[c].sockedfd, &recMessage);
-					//strip(recMessage.data);
+					strip(recMessage.data);
 					/* client is disconnecting */	
 					if (n == 0) {
 						disconnectClient(c, clients, &sendMessage);
