@@ -1,5 +1,5 @@
 CXX=gcc
-FLAGS=-Wall
+FLAGS=-Wall -pthreads
 
 TARGET=server
 SOURCES=$(wildcard *.c)
