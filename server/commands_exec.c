@@ -109,14 +109,14 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
         }
     }
 
-    Message *message;
+    Message message;
     if(taken != 1){
         strncpy(clients[cur].name, suggestedName, MAX_NAME);
-        updateAndWriteMessage(cur, message, "ok");
+        updateAndWriteMessage(cur, &message, "ok");
         return 1;
     }
     else{ //name taken, retry
-        updateAndWriteMessage(clients[cur].sockedfd, message, LANG_NAME_TAKEN);
+        updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_NAME_TAKEN);
         return 0;
     }
 }

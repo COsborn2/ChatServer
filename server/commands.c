@@ -42,10 +42,10 @@ int isCommand(const char *toParse) {
  * Take command in form: /j testRoom
  */
 int isValidCommand(const char *toParse) {
-    if (toParse != NULL && strlen(toParse) >= 2) {
-        if (toParse[0] == '/') { //starts with command character. Definitely not a chat message
+    if (toParse != NULL) {
+        if (toParse[0] == '/' && strlen(toParse) >= 2) { //starts with command character. Definitely not a chat message
 
-            char * temporaryS = malloc(strlen(toParse) + 1);
+            char * temporaryS = (char *)malloc(strlen(toParse) + 1);
             strcpy(temporaryS, toParse);
             makeLowerCase(temporaryS);
             char toTest = temporaryS[1];
@@ -101,7 +101,7 @@ int isValidCommand(const char *toParse) {
  * Take in validated String with a command and run associated action
  */
 void executeCommand(const char *toParse, const int cur, Client *clients, Message *message) {
-    char * temporaryS = malloc(strlen(toParse) + 1);
+    char * temporaryS = (char *)malloc(strlen(toParse) + 1);
     strcpy(temporaryS, toParse);
     makeLowerCase(temporaryS);
     char toTest = temporaryS[1];
