@@ -4,7 +4,7 @@ FLAGS=-Wall
 TARGET=server
 SOURCES=$(wildcard *.c)
 HEADERS=$(wildcard *.h)
-OBJECTS=$(patsubst %.c,o/%.o,$(SOURCES))
+OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
 compile: $(TARGET)
 
@@ -15,4 +15,4 @@ o/%.o: %.c $(HEADERS)
 	$(CXX) -c $< -o $@ $(FLAGS)
 
 clean:
-	rm -rf ./o/*.o
+	rm -rf *.o
