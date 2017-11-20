@@ -11,6 +11,9 @@
 
 #include "server.h"
 
+typedef struct client Client;
+typedef struct message Message;
+
 int isCommand(const char * toParse);
 int isValidCommand(const char * toParse);
 void makeLowerCase(char * toParse);
