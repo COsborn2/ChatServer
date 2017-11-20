@@ -1,4 +1,4 @@
-FLAGS= -g -c -m32 -pthread
+FLAGS= -g -c -m32
 
 EXE = client
 MAIN = ./client.c
@@ -6,7 +6,7 @@ MAIN = ./client.c
 FILE = ./file/file.o
 
 ${EXE}: ${FILE} ${MAIN}
-	gcc -o ${EXE} ${MAIN}
+	gcc -o ${EXE} ${MAIN} ${FILE} -lpthread
 
 #=======================================================================================================================
 
