@@ -45,31 +45,51 @@ int isValidCommand(const char *toParse) {
     if (toParse != NULL && strlen(toParse) >= 2) {
         if (toParse[0] == '/') { //starts with command character. Definitely not a chat message
 
-            char temporaryS[strlen(toParse) + 1];
+            char * temporaryS = malloc(strlen(toParse) + 1);
             strcpy(temporaryS, toParse);
             makeLowerCase(temporaryS);
             char toTest = temporaryS[1];
 
             switch (toTest) {
                 case 's' : //sets name
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) > 2;
                 case 'r' : //list the rooms on the server
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) == 2;
                 case 'l' : //lists people in the current room
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) == 2;
                 case 'x' : //close the connection and log off the server
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) == 2;
                 case 'q' : //end private chat
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) == 2;
                 case 'h' : //help
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) == 2;
                 case 'p' : //private chat
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) > 2;
                 case 'j' : //joins the given room
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) > 2;
                 case 'f' : //send file
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return strlen(toParse) > 2;
                 default : //doesn't match any command
+                    free(temporaryS);
+                    temporaryS = NULL;
                     return 0;
             }
         }
@@ -81,7 +101,7 @@ int isValidCommand(const char *toParse) {
  * Take in validated String with a command and run associated action
  */
 void executeCommand(const char *toParse, const int cur, Client *clients, Message *message) {
-    char temporaryS[strlen(toParse) + 1];
+    char * temporaryS = malloc(strlen(toParse) + 1);
     strcpy(temporaryS, toParse);
     makeLowerCase(temporaryS);
     char toTest = temporaryS[1];
@@ -92,32 +112,52 @@ void executeCommand(const char *toParse, const int cur, Client *clients, Message
     switch (toTest) {
         case 'x' : //disconnects
             disconnectClient(cur, clients, message);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 's' : //sets name
             setClientName(cur, clients, noSpaces + 2);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'r' : //list the rooms on the server
             executeRoomList(cur, clients, message);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'l' : //lists people in the current room
             executeClientList(cur, clients, message);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'q' : //end private chat
             executeEndPChat(cur, clients);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'h' : //help
             executeHelp(cur, clients, message);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'p' : //private chat
             executePChat(cur, clients, message);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'j' : //joins the given room
             executeJoinRoom(cur, clients, noSpaces + 2);
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         case 'f' : //send file
             //command is valid, do something
+            free(temporaryS);
+            temporaryS = NULL;
             break;
         default : //doesn't match any command
+            free(temporaryS);
+            temporaryS = NULL;
             break;
     }
 
