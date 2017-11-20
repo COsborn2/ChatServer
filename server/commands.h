@@ -26,7 +26,7 @@ void executeRoomList(const int cur, const Client *clients, Message *message); //
 void executeClientList(const int cur, const Client * clients, Message * message); // "/l"
 void executeJoinRoom(const int cur, Client * clients, char * toParse); // "j roomName"
 void executeHelp(const int cur, const Client *clients, Message *message); // "/h"
-void setClientName(const int cur, Client * clients, char * toParse); // "/s name"
+int setClientName(const int cur, Client * clients, char * toParse); // "/s name"
 void executePChat(const int cur, Client *clients, Message *message); // "/p name"
 void executeEndPChat(const int cur, Client *clients); // "/q"
 

@@ -36,7 +36,33 @@ int main() {
 	while (1) {
 		cmpl = masterList;
 		int toRead = select(maxfd + 1, &cmpl, NULL, NULL, NULL);
-		
+
+        if (FD_ISSET(listenFd, &cmpl)) {
+            unsigned int commfd = accept(listenFd, NULL, NULL);
+            int i = 0;
+            for (; i < MAXCLIENTS; ++i) {
+                /* checking for client not in use */
+                if (clients[i].connected == 0) {
+                    clients[i].connected = 1;
+                    clients[i].sockedfd = commfd;
+                    clients[i].roomNumber = roomStarting.id;
+                    clients[i].privChat = -1;
+                    strncpy(clients[i].name, defaultName, MAX_NAME);
+                    updateAndWriteMessage(commfd, &sendMessage, "ok");
+                    completeNameHS(commfd, clients, &recMessage);
+                    break;
+                }
+            }
+            FD_SET(commfd, &masterList);
+
+            updateAndWriteMessage(commfd, &sendMessage, LANG_WELCOME);
+            if (commfd > maxfd)
+                maxfd = commfd;
+
+            continue;
+        }
+
+
 		/* Loops through all clients to see if any have data to be read */
 		int c = 0;
 		for (; c < MAXCLIENTS; ++c) {
@@ -57,8 +83,8 @@ int main() {
 						removeSpaces(recMessage.data);
 						/* Sets the command to lowercase before processing it (not everything should be lower, as otherwise names will now not allow capitals) */
 						if (strlen(recMessage.data) > 1)
-							recMessage.data[1] = tolower(recMessage.data[1]);
-						
+							recMessage.data[1] = (char) tolower(recMessage.data[1]);
+
 						if (isValidCommand(recMessage.data)) {
 							executeCommand(recMessage.data, c, clients, &sendMessage);
 						}
@@ -81,36 +107,13 @@ int main() {
 						}
 						else {
 							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
-						}
+                        }
 					}
 				}
+                break;
 			}
 		}
-		
-		/* Doesn't bother to continue if nothing else to read */
-		if (toRead <= 0)
-			continue;
-		
-		if (FD_ISSET(listenFd, &cmpl)) {
-			unsigned int commfd = accept(listenFd, NULL, NULL);
-			int i = 0;
-			for (; i < MAXCLIENTS; ++i) {
-				/* checking for client not in use */
-				if (clients[i].connected == 0) {
-					clients[i].connected = 1;
-					clients[i].sockedfd = commfd;
-					clients[i].roomNumber = roomStarting.id;
-                    clients[i].privChat = -1;
-					strncpy(clients[i].name, defaultName, MAX_NAME);
-					break;
-				}
-			}
-			FD_SET(commfd, &masterList);
-			
-			updateAndWriteMessage(commfd, &sendMessage, LANG_WELCOME);
-			if (commfd > maxfd)
-				maxfd = commfd;
-		}
+
 	}
 	
 	return 0;
@@ -148,7 +151,7 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
     }
 
     /*closes socket and client*/
-	close(clients[cur].sockedfd);
+	//close(clients[cur].sockedfd);
 	clients[cur].connected = 0;
 	FD_CLR(clients[cur].sockedfd, &masterList);
 	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);
@@ -156,3 +159,10 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
     strcpy(clients[cur].name, DEFAULT_CLIENT_NAME); //set client name back to default
 }
 
+//Threaded method to confirm name
+void * completeNameHS(int sd, Client * clients, Message* msg){
+
+	do{
+		read(sd, msg->data, MAX);
+	}while(!setClientName(sd, clients, msg->data));
+}

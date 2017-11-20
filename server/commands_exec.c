@@ -97,7 +97,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
  * /s name
  * Takes prompt for username. If name is already taken tells user and exits
  */
-void setClientName(const int cur, Client * clients, char * suggestedName){
+int setClientName(const int cur, Client * clients, char * suggestedName){
     int taken = 0;
 
     //make sure client name is not taken
@@ -112,11 +112,12 @@ void setClientName(const int cur, Client * clients, char * suggestedName){
     Message *message;
     if(taken != 1){
         strncpy(clients[cur].name, suggestedName, MAX_NAME);
-        snprintf(message->data, MAX, "Welcome %s", clients[cur].name);
-        writeMessage(cur,message);
+        updateAndWriteMessage(cur, message, "ok");
+        return 1;
     }
     else{ //name taken, retry
         updateAndWriteMessage(clients[cur].sockedfd, message, LANG_NAME_TAKEN);
+        return 0;
     }
 }
 
