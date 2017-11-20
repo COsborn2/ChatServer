@@ -1,4 +1,4 @@
-FLAGS= -g -c -m32 -pthreads
+FLAGS= -g -c -m32 -pthread
 
 EXE = client
 MAIN = ./client.c
