@@ -22,7 +22,7 @@
 #define DEFAULT_CLIENT_NAME "Error"
 #define SERVER_PORT 22000
 
-typedef struct {
+typedef struct client {
     int connected;
     int sockedfd;
     char name[MAX_NAME];
@@ -31,12 +31,12 @@ typedef struct {
 } Client;
 
 
-typedef struct {
+typedef struct room {
 	int id;
 	char name[MAX_ROOM_NAME_LENGTH];
 } Room;
 
-typedef struct {
+typedef struct message {
 	char data[MAX];
 } Message;
 
