@@ -86,7 +86,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
 
         }
         else {
-            updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_ROOM_FULL);
+            updateAndWriteMessage(clients[cur].sockedfd, message, LANG_ROOM_FULL);
         }
     }
 
