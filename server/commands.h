@@ -14,10 +14,10 @@
 typedef struct client Client;
 typedef struct message Message;
 
-int isCommand(const char * toParse);
-int isValidCommand(const char * toParse);
+int isCommand(char * toParse);
+int isValidCommand(char * toParse);
 void makeLowerCase(char * toParse);
-void executeCommand(const char * toParse, const int cur, Client *clients, Message *message);
+void executeCommand(char * toParse, const int cur, Client *clients, Message *message);
 void removeSpaces(char * toParse);
 void strip(char * toParse);
 

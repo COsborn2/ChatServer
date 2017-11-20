@@ -47,11 +47,11 @@ void executeClientList(const int cur, const Client * clients, Message * message)
  * Puts user in a room
  */
 void executeJoinRoom(const int cur, Client * clients, char * toParse){
-    Message *message;
+    Message message;
 
     /*user cannot join a room with the default name*/
     if(strcmp(clients[cur].name, DEFAULT_CLIENT_NAME) == 0){
-        updateAndWriteMessage(cur,message, LANG_DEFAULT_NAME);
+        updateAndWriteMessage(clients[cur].sockedfd,&message, LANG_DEFAULT_NAME);
         return;
     }
 
@@ -66,7 +66,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
     }
     if(roomIndex == -1){
         /*room is invalid*/
-        updateAndWriteMessage(clients[cur].sockedfd, message, LANG_NO_SUCH_ROOM);
+        updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_NO_SUCH_ROOM);
     }
     else{
 
@@ -81,12 +81,12 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
         /*either adds client to room, or informs client that the room is full*/
         if(numberOfClients < MAX_ROOM_SIZE) {
             clients[cur].roomNumber = def_rooms[roomIndex]->id;
-            snprintf(message->data, MAX, "%s has joined %s", clients[cur].name, def_rooms[roomIndex]->name);
-            printToOthersInRoom(clients,cur,message);
+            snprintf(message.data, MAX, "%s has joined %s", clients[cur].name, def_rooms[roomIndex]->name);
+            printToOthersInRoom(clients,cur,&message);
 
         }
         else {
-            updateAndWriteMessage(clients[cur].sockedfd, message, LANG_ROOM_FULL);
+            updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_ROOM_FULL);
         }
     }
 
@@ -100,10 +100,12 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
 int setClientName(const int cur, Client * clients, char * suggestedName){
     int taken = 0;
 
+    printf("Setclientname(): suggestedName: %s\n", suggestedName);
     //make sure client name is not taken
     int i = 0;
     for(; i < MAXCLIENTS; i++){
         if(suggestedName == clients[i].name) {
+            printf("name taken\n");
             taken = 1;
             break;
         }
@@ -112,7 +114,8 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
     Message message;
     if(taken != 1){
         strncpy(clients[cur].name, suggestedName, MAX_NAME);
-        updateAndWriteMessage(cur, &message, "ok");
+        printf("setclientname(): client[cur].name: %s\n", clients[cur].name);
+        updateAndWriteMessage(clients[cur].sockedfd, &message, "ok");
         return 1;
     }
     else{ //name taken, retry

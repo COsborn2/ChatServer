@@ -49,7 +49,7 @@ int main() {
                     clients[i].privChat = -1;
                     strncpy(clients[i].name, defaultName, MAX_NAME);
                     updateAndWriteMessage(commfd, &sendMessage, "ok");
-                    completeNameHS(commfd, clients, &recMessage);
+                    completeNameHS(i, clients, &recMessage);
                     break;
                 }
             }
@@ -160,9 +160,9 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
 }
 
 //Threaded method to confirm name
-void * completeNameHS(int sd, Client * clients, Message* msg){
+void * completeNameHS(const int cur, Client * clients, Message* msg){
 
 	do{
-		read(sd, msg->data, MAX);
-	}while(!setClientName(sd, clients, msg->data));
+		read(clients[cur].sockedfd, msg->data, MAX);
+	}while(!setClientName(cur, clients, msg->data));
 }
