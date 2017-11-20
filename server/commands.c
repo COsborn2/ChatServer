@@ -25,7 +25,7 @@
  * Check if first character in array is /. If it is, the string is a command, not a chat message
  * Returns 0 if false. 1 if true
  */
-int isCommand(const char *toParse) {
+int isCommand(char *toParse) {
     if (toParse != NULL) {
         if (strlen(toParse) >= 1) {
             /* removeSpaces(toParse); Removed, since this gets called on all incoming text, which would prevent all spaces in talking */
@@ -41,7 +41,7 @@ int isCommand(const char *toParse) {
 /* return 1 if the command is VALID. Returns 0 if the command is NOT valid
  * Take command in form: /j testRoom
  */
-int isValidCommand(const char *toParse) {
+int isValidCommand(char *toParse) {
     if (toParse != NULL) {
         if (toParse[0] == '/' && strlen(toParse) >= 2) { //starts with command character. Definitely not a chat message
 
@@ -49,6 +49,9 @@ int isValidCommand(const char *toParse) {
             strcpy(temporaryS, toParse);
             makeLowerCase(temporaryS);
             char toTest = temporaryS[1];
+
+            printf("In isValidCommand(). toParse: %s\n", toParse);
+            printf("In isValidCommand(). toTest: %c\n", toTest);
 
             switch (toTest) {
                 case 's' : //sets name
@@ -100,14 +103,14 @@ int isValidCommand(const char *toParse) {
 /*
  * Take in validated String with a command and run associated action
  */
-void executeCommand(const char *toParse, const int cur, Client *clients, Message *message) {
+void executeCommand(char *toParse, const int cur, Client *clients, Message *message) {
     char * temporaryS = (char *)malloc(strlen(toParse) + 1);
     strcpy(temporaryS, toParse);
     makeLowerCase(temporaryS);
     char toTest = temporaryS[1];
 
-    char noSpaces[strlen(toParse) + 1];
-    strcpy(noSpaces, toParse);
+    printf("In executeCommand(). toParse: %s\n", toParse);
+    printf("In executeCommand(). toTest: %c\n", toTest);
 
     switch (toTest) {
         case 'x' : //disconnects
@@ -116,7 +119,7 @@ void executeCommand(const char *toParse, const int cur, Client *clients, Message
             temporaryS = NULL;
             break;
         case 's' : //sets name
-            setClientName(cur, clients, noSpaces + 2);
+            setClientName(cur, clients, toParse + 2);
             free(temporaryS);
             temporaryS = NULL;
             break;
@@ -146,7 +149,7 @@ void executeCommand(const char *toParse, const int cur, Client *clients, Message
             temporaryS = NULL;
             break;
         case 'j' : //joins the given room
-            executeJoinRoom(cur, clients, noSpaces + 2);
+            executeJoinRoom(cur, clients, toParse + 2);
             free(temporaryS);
             temporaryS = NULL;
             break;
