@@ -41,6 +41,7 @@ int readMessage(int commfd, Message *message) {
  * Updates the message and sends it to the given fd
  */
 void updateAndWriteMessage(int commfd, Message *message, const char *nstring) {
+	bzero(message->data, MAX);
 	updateMessage(message, nstring);
-	write(commfd, (char *)message, strlen(message->data));
+	write(commfd, message->data, strlen(message->data));
 }

@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include "commands.h"
 #include "lang.h"
+#include <pthread.h>
 
 #define MAXCLIENTS 30
 #define MAX 100
@@ -57,5 +58,6 @@ void printToAll(const Client *clients, Message *message);
 void printToOthersInRoom(const Client *clients, int cur, Message *message);
 void printToPrivChat(Client *clients, int cur,  Message * message);
 void disconnectClient(int cur, Client *clients, Message *sendMessage);
+void * completeNameHS(int sd, Client * clients, Message* msg);
 
 #endif
