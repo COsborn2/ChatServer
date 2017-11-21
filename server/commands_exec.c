@@ -90,6 +90,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
         }
         else {
             updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_ROOM_FULL);
+            printf("executeJoinRoom(): %s tried connecting to %s but room is full\n",clients[cur].name, def_rooms[roomIndex]->name);//debug
         }
     }
 
@@ -107,11 +108,12 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
     int i = 0;
     for(; i < MAXCLIENTS; i++){
         if(suggestedName == clients[i].name) {
-            printf("name taken\n");
             taken = 1;
             break;
         }
     }
+    if(strcmp(suggestedName,DEFAULT_CLIENT_NAME))
+        taken = 1;
 
     Message message;
     if(taken != 1){
@@ -124,6 +126,7 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
     }
     else{ //name taken, retry
         updateAndWriteMessage(clients[cur].sockedfd, &message, "no");
+        printf("setClientName(): client[%d] suggested name \"%s\" but it was already in use\n", cur, suggestedName);//debug
         return 0;
     }
 }

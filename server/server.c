@@ -16,7 +16,7 @@ int main() {
 	Message recMessage;
 	Message sendMessage;
 
-	unsigned int listenFd, maxfd;
+	int listenFd, maxfd;
 	struct sockaddr_in svaddr;
 	
 	listenFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -32,14 +32,15 @@ int main() {
 	fd_set cmpl;
 	FD_ZERO(&masterList);
 	FD_SET(listenFd, &masterList);
-	
+
+	printf("The sever is listening on port:%d\n", SERVER_PORT);//debug
 	while (1) {
 		cmpl = masterList;
 		int toRead = select(maxfd + 1, &cmpl, NULL, NULL, NULL);
 
         /*adds a new client that is connecting*/
         if (FD_ISSET(listenFd, &cmpl)) {
-            unsigned int commfd = accept(listenFd, NULL, NULL);
+            int commfd = accept(listenFd, NULL, NULL);
             int i = 0;
             for (; i < MAXCLIENTS; ++i) {
                 /* checking for client not in use */
@@ -51,7 +52,7 @@ int main() {
                     strncpy(clients[i].name, defaultName, MAX_NAME);
                     updateAndWriteMessage(commfd, &sendMessage, "ok");
                     completeNameHS(i, clients, &recMessage);
-                    printf("client %s connected\n",clients[i].name);//debug
+                    printf("client %s connected on socket descriptor %d\n",clients[i].name,commfd);//debug
                     break;
                 }
             }
@@ -79,6 +80,7 @@ int main() {
 					/* client is disconnecting */	
 					if (n == 0) {
 						disconnectClient(c, clients, &sendMessage);
+						continue;
 					}
 					if (isCommand(recMessage.data)) {
 						/* Fixes the command before parsing */
@@ -100,15 +102,18 @@ int main() {
 							//if in priv chat, send only to other client
 							if(clients[c].privChat >= 0) {
 								snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+								printf("private chat from sd %d to sd %d: %s\n", c, clients->privChat ,sendMessage.data);//debug
 								writeMessage(clients[c].privChat, &sendMessage);
 							}
 							else{
 								snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+								printf("%s\n",sendMessage.data);//debug
 								printToOthersInRoom(clients, c, &sendMessage);
 							}
 						}
 						else {
 							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
+							printf("%s\n",sendMessage.data);//debug
                         }
 					}
 				}
@@ -153,7 +158,7 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
     }
 
     /*closes client*/
-    printf("disconnectClient(): client %s disconnecting",clients[cur].name);//debug
+    printf("disconnectClient(): client %s disconnecting\n",clients[cur].name);//debug
 	clients[cur].connected = 0;
 	FD_CLR(clients[cur].sockedfd, &masterList);
 	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);
