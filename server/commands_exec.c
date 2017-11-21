@@ -5,8 +5,8 @@
  */
 void executeRoomList(const int cur, const Client *clients, Message *message) {
 	int i = 0;
-	for (; i < default_room_count; ++i) {
-		sprintf(message->data, "%s, %d", def_rooms[i]->name, def_rooms[i]->id);
+	for (; i < default_room_count; i++) {
+		sprintf(message->data, "\t%s\n", def_rooms[i]->name);
 		writeMessage(clients[cur].sockedfd, message);
 	}
 }
@@ -112,7 +112,7 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
             break;
         }
     }
-    if(strcmp(suggestedName,DEFAULT_CLIENT_NAME))
+    if(strcmp(suggestedName,DEFAULT_CLIENT_NAME)== 0)
         taken = 1;
 
     Message message;

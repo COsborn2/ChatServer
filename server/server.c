@@ -33,7 +33,7 @@ int main() {
 	FD_ZERO(&masterList);
 	FD_SET(listenFd, &masterList);
 
-	printf("The sever is listening on port:%d\n", SERVER_PORT);//debug
+	printf("The server is listening on port:%d\n", SERVER_PORT);//debug
 	while (1) {
 		cmpl = masterList;
 		int toRead = select(maxfd + 1, &cmpl, NULL, NULL, NULL);
@@ -113,12 +113,14 @@ int main() {
 						}
 						else {
 							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
+                            updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_CHOOSE_ROOM);
 							printf("%s\n",sendMessage.data);//debug
                         }
 					}
 				}
                 break;
 			}
+
 		}
 
 	}
