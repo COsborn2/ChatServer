@@ -5,8 +5,8 @@
  */
 void executeRoomList(const int cur, const Client *clients, Message *message) {
 	int i = 0;
-	for (; i < default_room_count; ++i) {
-		sprintf(message->data, "%s, %d", def_rooms[i]->name, def_rooms[i]->id);
+	for (; i < default_room_count; i++) {
+		sprintf(message->data, "\t%s\n", def_rooms[i]->name);
 		writeMessage(clients[cur].sockedfd, message);
 	}
 }
@@ -52,6 +52,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
     /*user cannot join a room with the default name*/
     if(strcmp(clients[cur].name, DEFAULT_CLIENT_NAME) == 0){
         updateAndWriteMessage(clients[cur].sockedfd,&message, LANG_DEFAULT_NAME);
+        printf("executeJoinRoom(): clients[%d] tried connecting to %s\n",cur, toParse);//debug
         return;
     }
 
@@ -67,6 +68,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
     if(roomIndex == -1){
         /*room is invalid*/
         updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_NO_SUCH_ROOM);
+        printf("executeJoinRoom(): %s tried connecting to %s\n",clients[cur].name, toParse);//debug
     }
     else{
 
@@ -82,11 +84,13 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
         if(numberOfClients < MAX_ROOM_SIZE) {
             clients[cur].roomNumber = def_rooms[roomIndex]->id;
             snprintf(message.data, MAX, "%s has joined %s", clients[cur].name, def_rooms[roomIndex]->name);
+            printf("executeJoinRoom(): %s\n",message.data);//debug
             printToOthersInRoom(clients,cur,&message);
 
         }
         else {
             updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_ROOM_FULL);
+            printf("executeJoinRoom(): %s tried connecting to %s but room is full\n",clients[cur].name, def_rooms[roomIndex]->name);//debug
         }
     }
 
@@ -100,26 +104,29 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
 int setClientName(const int cur, Client * clients, char * suggestedName){
     int taken = 0;
 
-    printf("Setclientname(): suggestedName: %s\n", suggestedName);
     //make sure client name is not taken
     int i = 0;
     for(; i < MAXCLIENTS; i++){
         if(suggestedName == clients[i].name) {
-            printf("name taken\n");
             taken = 1;
             break;
         }
     }
+    if(strcmp(suggestedName,DEFAULT_CLIENT_NAME)== 0)
+        taken = 1;
 
     Message message;
     if(taken != 1){
+        char oldName[MAX_NAME];
+        strncpy(oldName,clients[cur].name, MAX_NAME);//debug
         strncpy(clients[cur].name, suggestedName, MAX_NAME);
-        printf("setclientname(): client[cur].name: %s\n", clients[cur].name);
+        printf("setClientName(): client[%d].name changed to %s from %s\n", cur,clients[cur].name,oldName);//debug
         updateAndWriteMessage(clients[cur].sockedfd, &message, "ok");
         return 1;
     }
     else{ //name taken, retry
-        updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_NAME_TAKEN);
+        updateAndWriteMessage(clients[cur].sockedfd, &message, "no");
+        printf("setClientName(): client[%d] suggested name \"%s\" but it was already in use\n", cur, suggestedName);//debug
         return 0;
     }
 }

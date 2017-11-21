@@ -43,6 +43,6 @@ int readMessage(int commfd, Message *message) {
 void updateAndWriteMessage(int commfd, Message *message, const char *nstring) {
 	bzero(message->data, MAX);
 	updateMessage(message, nstring);
-	printf("updateandwritemessage(): commfd: %d\n", commfd);
+	//printf("updateandwritemessage(): commfd: %d\n", commfd);//debug
 	write(commfd, message->data, strlen(message->data));
 }

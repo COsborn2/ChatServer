@@ -5,20 +5,19 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include "file/file.h"
 
 #define NAMELENGTH 8
+#define MAX_BUFF 512
 
-/*
-This program acts as a client and takes input from keyboard to send to
-a server.
-
-Authors: Kenneth White, Casey White, Cameron Osborne, Andy Robinson
+/*This program acts as a client and takes input from keyboard to sends to
+ *a server.
+ *
+ *Authors: Kenneth White, Casey White, Cameron Osborne, Andy Robinson
 */
-void *readT(void *sockfd);
 
+//void *readT(void *sockfd);
 void getUserName(char userName[]);
 
 int containsFileT(char *str);
@@ -26,13 +25,17 @@ int containsFileT(char *str);
 int main(int argc, char **argv) {
 
     int sockfd, n, nb;
-    char sendline[100], ack[3], userName[NAMELENGTH];
+    char sendline[MAX_BUFF], ack[3], userName[NAMELENGTH];
     bzero(ack, 3);
     struct sockaddr_in servaddr;
     pthread_t thread1;
     char IP[20] = "127.0.0.1";
     uint16_t port = 22000;
     getUserName(userName);
+    fd_set masterList;
+    fd_set tempList;
+
+
 
 /*Take an optional IP address, or IP Address and port no. from command line*/
     if (argc == 2) {
@@ -50,58 +53,94 @@ int main(int argc, char **argv) {
     inet_pton(AF_INET, IP, &(servaddr.sin_addr));
 
     connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    FD_ZERO(&masterList);
+    FD_SET(sockfd, &masterList);
+    FD_SET(0, &masterList);
+    tempList = masterList;
     read(sockfd, ack, 2);
+
     int debug;
-    if (strcmp(ack, "ok") == 0){
-        while (1) {
-            write(sockfd, userName, NAMELENGTH);
-            bzero(ack, 3);
-            read(sockfd, ack, 2);
-            if (strcmp(ack, "ok") == 0) {
-                pthread_create(&thread1, NULL, readT, &sockfd);
+    if (strcmp(ack, "ok") != 0) {
+        goto joinFail;
+    }//invalid connect
 
-                /*Takes input from client, writes to server*/
-                while (1) {
-                    bzero(sendline, 100);   //clean char arrays
-                    printf("\nEnter String to send to Server: ");
-                    fgets(sendline, 100, stdin);  //gets input
-
-                    if (containsFileT(sendline)) {
-                        if (sendFile(sendline, sockfd)) {
-                            printf("\nFile Sent Successfully.");
-                        } else { printf("\nFile failed to send."); }
-                    }
-
-                    write(sockfd, sendline, strlen(sendline) + 1);
-                }
-            } else {
-                printf("Entered username is not unique\n");
-                getUserName(userName);
-            }
-        }//while 1
-}
-    close(sockfd);
-    printf("ack: %s debug: %d", ack, debug);
-}
-
-/*Thread used to read from server*/
-void *readT(void *sockfd) {
-    char recvline[100];
-    int sd = *(int *) sockfd;
-    int tst;
-
+    //Re-prompt name until given ok from server
     while (1) {
-        bzero(recvline, 100);
-        tst = read(sd, recvline, 100);  //receive
-        if (tst > 0) {
-            printf("\n%s", recvline);
-            if (containsFileT(recvline)) {
-                recFile(recvline, sd);
+        write(sockfd, userName, NAMELENGTH);
+        bzero(ack, 3);
+        //waits on input from server
+        read(sockfd, ack, 2);
+        if (strcmp(ack, "ok") != 0) {
+            printf("Entered username is not unique\n");
+            getUserName(userName);
+        } else { break; }
+    }//name loop
+
+
+    //Primary listen loop
+    while (1) {
+        tempList = masterList;
+        select(10, &tempList, NULL, NULL, NULL);
+
+        //socket ready to read
+        if (FD_ISSET(sockfd, &tempList)) {
+            read:
+            bzero(sendline, MAX_BUFF);
+
+            do {
+                nb = read(sockfd, sendline, MAX_BUFF-1);  //receive
+                if (nb > 0) {
+                    printf("%s\n", sendline);
+                    if (containsFileT(sendline)) {
+                        recFile(sendline, sockfd);
+                        printf("File received.\n");
+                    }
+                }
+                else{//server socket down
+                    close(sockfd);
+                    printf("\n\n***Lost connection with server. Exiting.***");
+                    exit(0);
+                }
+
+            } while (nb == MAX_BUFF-1);//if true, buffer not empty
+            printf("Enter String to send to Server:\n");
+            continue;
+        }//END if sockfd
+
+
+        //client ready to write
+        if (FD_ISSET(0, &tempList)) {
+            bzero(sendline, MAX_BUFF);   //clean char arrays
+
+            fgets(sendline, MAX_BUFF-1, stdin);  //gets input
+
+            if (containsFileT(sendline)) {
+                if (sendFile(sendline, sockfd)) {
+                    printf("\nFile Sent Successfully.");
+                } else { printf("\nFile failed to send."); }
             }
-        }
-    }
-    pthread_exit(0);
+
+            write(sockfd, sendline, strlen(sendline) + 1);
+        }// END if KB
+    }// END listen loop
+
+    joinFail:
+    close(sockfd);
+    printf("Failed to join with ack: %s", ack);
 }
+
+//Implemented via select()
+///*Thread used to read from server*/
+//void *readT(void *sockfd) {
+//    char recvline[100];
+//    int sd = *(int *) sockfd;
+//    int tst;
+//
+//    while (1) {
+//
+//    }
+//    pthread_exit(0);
+//}
 
 void getUserName(char userName[]) {
     char temp[100];
