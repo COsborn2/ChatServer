@@ -20,7 +20,7 @@
 
 #define MAX_NAME 8
 #define MAX_ROOM_NAME_LENGTH 16
-#define DEFAULT_CLIENT_NAME "Error"
+#define DEFAULT_CLIENT_NAME "DEFAULT"
 #define SERVER_PORT 22000
 
 typedef struct client {
