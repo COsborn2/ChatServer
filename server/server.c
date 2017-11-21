@@ -37,6 +37,7 @@ int main() {
 		cmpl = masterList;
 		int toRead = select(maxfd + 1, &cmpl, NULL, NULL, NULL);
 
+        /*adds a new client that is connecting*/
         if (FD_ISSET(listenFd, &cmpl)) {
             unsigned int commfd = accept(listenFd, NULL, NULL);
             int i = 0;
@@ -50,6 +51,7 @@ int main() {
                     strncpy(clients[i].name, defaultName, MAX_NAME);
                     updateAndWriteMessage(commfd, &sendMessage, "ok");
                     completeNameHS(i, clients, &recMessage);
+                    printf("client %s connected\n",clients[i].name);//debug
                     break;
                 }
             }
@@ -150,8 +152,8 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
         }
     }
 
-    /*closes socket and client*/
-	//close(clients[cur].sockedfd);
+    /*closes client*/
+    printf("disconnectClient(): client %s disconnecting",clients[cur].name);//debug
 	clients[cur].connected = 0;
 	FD_CLR(clients[cur].sockedfd, &masterList);
 	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);

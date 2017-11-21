@@ -52,6 +52,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
     /*user cannot join a room with the default name*/
     if(strcmp(clients[cur].name, DEFAULT_CLIENT_NAME) == 0){
         updateAndWriteMessage(clients[cur].sockedfd,&message, LANG_DEFAULT_NAME);
+        printf("executeJoinRoom(): clients[%d] tried connecting to %s\n",cur, toParse);//debug
         return;
     }
 
@@ -67,6 +68,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
     if(roomIndex == -1){
         /*room is invalid*/
         updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_NO_SUCH_ROOM);
+        printf("executeJoinRoom(): %s tried connecting to %s\n",clients[cur].name, toParse);//debug
     }
     else{
 
@@ -82,6 +84,7 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
         if(numberOfClients < MAX_ROOM_SIZE) {
             clients[cur].roomNumber = def_rooms[roomIndex]->id;
             snprintf(message.data, MAX, "%s has joined %s", clients[cur].name, def_rooms[roomIndex]->name);
+            printf("executeJoinRoom(): %s\n",message.data);//debug
             printToOthersInRoom(clients,cur,&message);
 
         }
@@ -100,7 +103,6 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
 int setClientName(const int cur, Client * clients, char * suggestedName){
     int taken = 0;
 
-    printf("Setclientname(): suggestedName: %s\n", suggestedName);
     //make sure client name is not taken
     int i = 0;
     for(; i < MAXCLIENTS; i++){
@@ -113,13 +115,15 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
 
     Message message;
     if(taken != 1){
+        char oldName[MAX_NAME];
+        strncpy(oldName,clients[cur].name, MAX_NAME);//debug
         strncpy(clients[cur].name, suggestedName, MAX_NAME);
-        printf("setclientname(): client[cur].name: %s\n", clients[cur].name);
+        printf("setClientName(): client[%d].name changed to %s from %s\n", cur,clients[cur].name,oldName);//debug
         updateAndWriteMessage(clients[cur].sockedfd, &message, "ok");
         return 1;
     }
     else{ //name taken, retry
-        updateAndWriteMessage(clients[cur].sockedfd, &message, LANG_NAME_TAKEN);
+        updateAndWriteMessage(clients[cur].sockedfd, &message, "no");
         return 0;
     }
 }
