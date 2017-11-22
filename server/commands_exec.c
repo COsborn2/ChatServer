@@ -86,6 +86,8 @@ void executeJoinRoom(const int cur, Client * clients, char * toParse){
             snprintf(message.data, MAX, "%s has joined %s", clients[cur].name, def_rooms[roomIndex]->name);
             printf("executeJoinRoom(): %s\n",message.data);//debug
             printToOthersInRoom(clients,cur,&message);
+	    snprintf(message.data, MAX, "You have joined room \"%s\"", def_rooms[roomIndex]->name);
+            writeMessage(clients[cur].sockedfd, &message);
 
         }
         else {
