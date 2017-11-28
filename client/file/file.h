@@ -14,3 +14,4 @@
 int sendFile(char* initStr, int sd);
 unsigned int fileSize(char* fileName);
 int recFile(char* initStr, int sd);
+void strip(char *toParse);

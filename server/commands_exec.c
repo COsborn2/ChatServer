@@ -35,9 +35,14 @@ void executeHelp(const int cur, const Client *clients, Message *message) {
 void executeClientList(const int cur, const Client * clients, Message * message){
     int i = 0;
     int roomToPrint = clients[cur].roomNumber;
+    char temp[MAX];
     for(; i < MAXCLIENTS; i++){
-        if( clients[i].roomNumber == roomToPrint)
-            updateAndWriteMessage(clients[cur].sockedfd, message,clients[i].name);
+        if( clients[i].roomNumber == roomToPrint) {
+            bzero(temp, MAX);
+            strcpy(temp, clients[i].name);
+            strcat(temp, "\t"); //for formatting
+            updateAndWriteMessage(clients[cur].sockedfd, message, temp);
+        }
     }
 }
 
@@ -146,27 +151,27 @@ void executePChat(const int cur, Client *clients, Message *message) {
         return;
     }
 
-
     //increment past '/r '
-	char* temp;
+	char temp[100];
+     char * ptr;
 	strcpy(temp, message->data);
-	if(temp[2] == ' '){temp = temp +3;}
-	else{temp = temp + 2;}
-
-
-
+	if(temp[2] == ' '){ptr = temp+3;}
+	else{ptr = temp + 2;}
 
 	//sets privChat to 1 in both client, adds index in client for priv_chats array
 	int x = 0;
 	for(; x < MAXCLIENTS; x++){
-		if(strcmp(temp, clients[x].name) == 0){
+        if(clients[x].connected != 1){ continue;}
+		if(strcmp(ptr, clients[x].name) == 0){
             if(clients[x].privChat >= 0){
                 dprintf(clients[cur].sockedfd, "\nServer: User %s is already in a private chat.\n", clients[x].name);
                 return;
             }
 			clients[x].privChat = clients[cur].sockedfd;
 			clients[cur].privChat = clients[x].sockedfd;
-			return;
+            dprintf(clients[cur].sockedfd, "Joined a private chat with %s\n", clients[x].name);
+            dprintf(clients[x].sockedfd, "Joined a private chat with %s\n", clients[cur].name);
+            return;
 		}
 	}
 	//failed to create private chat
@@ -203,4 +208,46 @@ void executeEndPChat(const int cur, Client *clients) {
 	}
 	//failed to quit private chat
 	dprintf(clients[cur].sockedfd, "\nServer: Could not find user with that name.\n");
+}
+
+void executeFT(int cur, Client * clients, char * toParse){
+
+    char * ptr;
+    char temp[256];
+    unsigned long fsize;
+    int x;
+    ssize_t rd;
+    int w = 1;
+
+
+    if(toParse[2] == ' '){ptr = toParse+3;}
+    else{ptr = toParse + 2;}
+
+    fsize= strtoul(toParse, 0, 10);
+
+    //not in a priv chat
+    if(clients[cur].privChat < 0){
+        dprintf(clients[cur].sockedfd, "Server: You are not connected to a private chat.\n");
+        dprintf(clients[cur].sockedfd, "Server: File will not be transferred.\n");
+        //File is still coming! We will read and discard
+       w = 0;
+    }
+    //We write to the other
+    x=0;
+    rd= 0;
+    while(x < fsize) {
+        bzero( &temp, 256);
+        rd = read(clients[cur].sockedfd,&temp,256);
+        if(w){
+            write(clients[cur].privChat, toParse, strlen(toParse));
+            write(clients[cur].privChat,&temp, 256);
+        }
+
+        x+= rd;
+    }
+    if(w){
+        dprintf(clients[cur].sockedfd, "Server: File transferred.\n");
+        dprintf(clients[cur].privChat, "Server: File transferred to you.\n");
+    }
+
 }
