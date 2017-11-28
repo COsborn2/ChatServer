@@ -15,7 +15,7 @@ int sendFile(char* initStr, int sd){
 	else{ptr = initStr+2;}
     strip(ptr);
     if(strlen(ptr) > 8){
-        fprintf(stderr,"Filename is too long:\"%s\"\n", ptr);
+        fprintf(stderr,"Client: Filename is too long:\"%s\"\n", ptr);
         return 0; //send failed
     }
 
@@ -26,7 +26,7 @@ int sendFile(char* initStr, int sd){
 
     if((fd = open(ptr, O_RDONLY)) < 0)
     {
-        fprintf(stderr, "Open error: %s\n", ptr);
+        fprintf(stderr, "Client: Open error: %s\n", ptr);
         return 0; //send failed
     }
 
@@ -36,7 +36,7 @@ int sendFile(char* initStr, int sd){
     lseek(fd, 0, SEEK_SET);     //reset pointer to  beginning of file
 
     //write file info to socket
-    size = htonl(size);
+    //size = htonl(size); This is not working correctly
 	dprintf(sd, "/f%4i", size);
 	bzero(buffer, 256);
     strncpy(buffer,ptr, strlen(ptr));
@@ -79,6 +79,7 @@ unsigned int fileSize(char* fileName){
  */
 int recFile(char * initStr, int sd)
     {
+
 		//increment past "/f "
         char * ptr;
         if(initStr[2] == ' '){ptr = initStr+3;}
@@ -92,35 +93,46 @@ int recFile(char * initStr, int sd)
 		
 		//retrieve filesize
         strncpy(temp, ptr, 4);
+        ptr =  ptr+4;
         fsize= strtoul(temp, 0, 10);
 		
 		//TODO
-        printf("Debug-fname: %lu\n", fsize);
+        printf("Debug-fsize: %lu\n", fsize);
 
         //read filename
         bzero(temp, 256);
-        read(sd, temp, 8);
-		
+        if(*ptr != '\0'){ //already in temp
+            strcpy(temp, ptr);
+            ptr += strlen(temp);
+        }
+        else{
+            read(sd, temp, 8);
+        }
+
         //Attempts to create file
         if((fd = open(temp, O_WRONLY | O_CREAT, 0666)) < 0)
-        {  fprintf(stderr, "\nOpen/Create error: %s\n", temp);
+        {  fprintf(stderr, "\nClient: Open/Create error: %s\n", temp);
             return 0; //read failed
         }
         //TODO
-        printf("Opened/created file %s for writing. \n", temp);
+        printf("Debug: Opened/created file %s for writing. \n", temp);
 
+        if(ptr != '\0'){
+            write(fd, ptr, strlen(ptr)); //write remaineder in temp
+            fsize-= strlen(ptr);
+        }
         //remaining bytes should be file contents
         x=0;
         ssize_t rd= 0;
         while(x < fsize) {
             bzero( &temp, 256);
             rd = read(sd,&temp,256);
-            write(fd,&temp, 256);
+            write(fd,&temp, strlen(temp));
             x+= 1+ rd;
         }
 
         //TODO
-        printf("File Write Complete. \n");
+        printf("Debug: File Write Complete. \n");
 
         close(fd);
         return 1;    //write success

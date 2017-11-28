@@ -154,8 +154,7 @@ void executeCommand(char *toParse, const int cur, Client *clients, Message *mess
             temporaryS = NULL;
             break;
         case 'f' : //send file
-            //command is valid, do something
-
+            executeFT(cur,clients,toParse);
             free(temporaryS);
             temporaryS = NULL;
             break;

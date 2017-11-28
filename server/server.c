@@ -112,9 +112,17 @@ int main() {
 							}
 						}
 						else {
-							updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
-                            updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_CHOOSE_ROOM);
-							printf("%s\n",sendMessage.data);//debug
+                            if (clients[c].privChat >= 0) {
+                                snprintf(sendMessage.data, MAX, "%s: %s", clients[c].name, recMessage.data);
+                                printf("private chat from sd %d to sd %d: %s\n", c, clients->privChat,
+                                       sendMessage.data);//debug
+                                writeMessage(clients[c].privChat, &sendMessage);
+                            }
+                            else {
+                                updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_NO_TALK);
+                                updateAndWriteMessage(clients[c].sockedfd, &sendMessage, LANG_CHOOSE_ROOM);
+                                printf("%s\n", sendMessage.data);//debug
+                            }
                         }
 					}
 				}
@@ -152,7 +160,7 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
     if(clients[cur].privChat >= 0){
         int i = 0;
         for(; i < MAXCLIENTS; i++){
-            if(clients[i].privChat == cur){
+            if(clients[i].privChat == clients[cur].sockedfd){
                 clients[i].privChat = -1;
                 updateAndWriteMessage(i,sendMessage, LANG_PRIVATE_CHAT);
                 break;

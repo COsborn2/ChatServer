@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         } else { break; }
     }//name loop
 
-    printf("Press enter to send message to Server:\n");
+    printf("Client: Press enter to send message to Server:\n");
     //Primary listen loop
     while (1) {
         tempList = masterList;
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
                     printf("%s\n", sendline);
                     if (containsFileT(sendline)) {
                         recFile(sendline, sockfd);
-                        printf("File received.\n");
+                        printf("Client: File received.\n");
                     }
                 }
                 else{//server socket down
@@ -116,8 +116,8 @@ int main(int argc, char **argv) {
 
             if (containsFileT(sendline)) {
                 if (sendFile(sendline, sockfd)) {
-                    printf("\nFile Sent Successfully.");
-                } else { printf("\nFile failed to send."); }
+                    printf("\nClient: File Sent Successfully.");
+                } else { printf("\nClient: File failed to send."); }
             }
 
             write(sockfd, sendline, strlen(sendline) + 1);
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 
     joinFail:
     close(sockfd);
-    printf("Failed to join with ack: %s", ack);
+    printf("Failed to join with Server ack '%s' instead of 'ok'", ack);
 }
 
 //Implemented via select()

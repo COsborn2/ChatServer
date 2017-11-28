@@ -142,7 +142,7 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
  /*
  * Opens a private chat between cur and specified user
  */
-void executePChat(const int cur, Client *clients, Message *message) {
+void executePChat(const int cur, Client *clients, char *message) {
 
     //Client already in priv chat
     if(clients[cur].privChat >= 0){
@@ -154,7 +154,7 @@ void executePChat(const int cur, Client *clients, Message *message) {
     //increment past '/r '
 	char temp[100];
      char * ptr;
-	strcpy(temp, message->data);
+	strcpy(temp, message);
 	if(temp[2] == ' '){ptr = temp+3;}
 	else{ptr = temp + 2;}
 
@@ -217,13 +217,17 @@ void executeFT(int cur, Client * clients, char * toParse){
     unsigned long fsize;
     int x;
     ssize_t rd;
-    int w = 1;
+    int w = 1; //sentry
 
 
     if(toParse[2] == ' '){ptr = toParse+3;}
     else{ptr = toParse + 2;}
 
-    fsize= strtoul(toParse, 0, 10);
+    fsize= strtoul(ptr, 0, 10);
+//debug
+//    printf("In executeFT(). toParse: %s", toParse);
+//    printf("In executeFT(). ptr: %s", ptr);
+//    printf("In executeFT(). fsize: %li", fsize);
 
     //not in a priv chat
     if(clients[cur].privChat < 0){
@@ -239,10 +243,10 @@ void executeFT(int cur, Client * clients, char * toParse){
         bzero( &temp, 256);
         rd = read(clients[cur].sockedfd,&temp,256);
         if(w){
+
             write(clients[cur].privChat, toParse, strlen(toParse));
             write(clients[cur].privChat,&temp, 256);
         }
-
         x+= rd;
     }
     if(w){
