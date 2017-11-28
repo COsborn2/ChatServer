@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         } else { break; }
     }//name loop
 
-
+    printf("Press enter to send message to Server:\n");
     //Primary listen loop
     while (1) {
         tempList = masterList;
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
                 }
 
             } while (nb == MAX_BUFF-1);//if true, buffer not empty
-            printf("Enter String to send to Server:\n");
+            
             continue;
         }//END if sockfd
 

@@ -10,11 +10,12 @@
 
 int sendFile(char* initStr, int sd){
 	//increment past "/f "
-	if(initStr[2] == ' '){initStr +=3;}
-	else{initStr +=2;}
-	
-    if(strlen(initStr) > 8){
-        fprintf(stderr,"Filename is too long:%s\n", initStr);
+    char * ptr;
+	if(initStr[2] == ' '){ptr = initStr+3;}
+	else{ptr = initStr+2;}
+    strip(ptr);
+    if(strlen(ptr) > 8){
+        fprintf(stderr,"Filename is too long:\"%s\"\n", ptr);
         return 0; //send failed
     }
 
@@ -23,9 +24,9 @@ int sendFile(char* initStr, int sd){
     char buffer[256];
 
 
-    if((fd = open(initStr, O_RDONLY)) < 0)
+    if((fd = open(ptr, O_RDONLY)) < 0)
     {
-        fprintf(stderr, "Open error: %s\n", initStr);
+        fprintf(stderr, "Open error: %s\n", ptr);
         return 0; //send failed
     }
 
@@ -38,7 +39,7 @@ int sendFile(char* initStr, int sd){
     size = htonl(size);
 	dprintf(sd, "/f%4i", size);
 	bzero(buffer, 256);
-    strncpy(buffer,initStr, strlen(initStr));
+    strncpy(buffer,ptr, strlen(ptr));
     write(sd, &buffer, 8);
 	
     bzero(buffer, 256);
@@ -79,8 +80,9 @@ unsigned int fileSize(char* fileName){
 int recFile(char * initStr, int sd)
     {
 		//increment past "/f "
-		if(initStr[2] == ' '){initStr +=3;}
-		else{initStr +=2;}
+        char * ptr;
+        if(initStr[2] == ' '){ptr = initStr+3;}
+        else{ptr = initStr+2;}
 		
         int x, fd;
         char temp[256];
@@ -89,7 +91,7 @@ int recFile(char * initStr, int sd)
         bzero(temp, 256);
 		
 		//retrieve filesize
-        strncpy(temp, initStr, 4);
+        strncpy(temp, ptr, 4);
         fsize= strtoul(temp, 0, 10);
 		
 		//TODO
@@ -125,3 +127,23 @@ int recFile(char * initStr, int sd)
     }
 
 
+/*
+ * Takes in string and removes newline and tab characters
+ */
+void strip(char *toParse) {
+    if (toParse != NULL) {
+        int len = strlen(toParse);
+        int i = 0;
+
+        while (toParse[i] != '\0' && i < len) {
+            if (toParse[i] == '\r')
+                toParse[i] = '\0';
+
+            else if (toParse[i] == '\n')
+                toParse[i] = '\0';
+
+            i++;
+
+        }// end while
+    }
+}// end strip

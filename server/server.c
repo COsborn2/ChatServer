@@ -118,7 +118,8 @@ int main() {
                         }
 					}
 				}
-                break;
+                //break;
+                //Dont break, continue checking other clients
 			}
 
 		}

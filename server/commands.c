@@ -144,7 +144,7 @@ void executeCommand(char *toParse, const int cur, Client *clients, Message *mess
             temporaryS = NULL;
             break;
         case 'p' : //private chat
-            executePChat(cur, clients, message);
+            executePChat(cur, clients, toParse);
             free(temporaryS);
             temporaryS = NULL;
             break;
@@ -155,6 +155,7 @@ void executeCommand(char *toParse, const int cur, Client *clients, Message *mess
             break;
         case 'f' : //send file
             //command is valid, do something
+
             free(temporaryS);
             temporaryS = NULL;
             break;

@@ -29,5 +29,5 @@ void executeHelp(const int cur, const Client *clients, Message *message); // "/h
 int setClientName(const int cur, Client * clients, char * toParse); // "/s name"
 void executePChat(const int cur, Client *clients, Message *message); // "/p name"
 void executeEndPChat(const int cur, Client *clients); // "/q"
-
+void executeFT(int cur, Client * clients, char * toParse);// "/f size"
 #endif
