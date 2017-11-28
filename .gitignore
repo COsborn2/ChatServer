@@ -60,3 +60,4 @@ cmake-build-debug
 .DS_Store
 CMakeLists.txt
 server/server
+client/test.txt
