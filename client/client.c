@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "file/file.h"
 
 #define NAMELENGTH 8
@@ -14,7 +15,7 @@
 /*This program acts as a client and takes input from keyboard to sends to
  *a server.
  *
- *Authors: Kenneth White, Casey White, Cameron Osborne, Andy Robinson
+ *Authors: Kenneth White, Casey White, Cameron Osborne, Andy Robinson, Arrin Torno
 */
 
 //void *readT(void *sockfd);
@@ -36,13 +37,19 @@ int main(int argc, char **argv) {
     fd_set tempList;
 
 
-
 /*Take an optional IP address, or IP Address and port no. from command line*/
-    if (argc == 2) {
-        IP[0] = *argv[1];
-    } else if (argc == 3) {
-        IP[0] = *argv[1];
-        port = (uint16_t) argv[2];
+    if (argc >= 2) {
+    	strncpy(IP, argv[1], 20);
+    }
+    if (argc >= 3) {
+    	long int rval = strtol(argv[2], NULL, 10);
+    	
+		if (rval >= SHRT_MIN && rval <= SHRT_MAX)
+		    port = rval;
+    	else {
+    		printf("Port number is not within the proper range!\n");
+    		return 0;
+    	}
     }
 
     /*Initialize Socket*/
@@ -126,7 +133,7 @@ int main(int argc, char **argv) {
 
     joinFail:
     close(sockfd);
-    printf("Failed to join with Server ack '%s' instead of 'ok'", ack);
+    printf("Failed to join with Server ack '%s' instead of 'ok'\n", ack);
 }
 
 //Implemented via select()
