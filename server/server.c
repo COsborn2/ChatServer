@@ -147,7 +147,7 @@ void printToOthersInRoom(const Client *clients, int cur, Message *message) {
 	int i = 0;
 	for (; i < MAXCLIENTS; ++i) {
 		/* Client must be in same room, and not be the current person */
-		if (i != cur &&clients[i].roomNumber == clients[cur].roomNumber)
+		if (i != cur &&clients[i].roomNumber == clients[cur].roomNumber && clients[i].connected == 1)
 			writeMessage(clients[i].sockedfd, message);
 	}
 }
@@ -162,7 +162,8 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
         for(; i < MAXCLIENTS; i++){
             if(clients[i].privChat == clients[cur].sockedfd){
                 clients[i].privChat = -1;
-                updateAndWriteMessage(i,sendMessage, LANG_PRIVATE_CHAT);
+
+                updateAndWriteMessage(clients[i].sockedfd ,sendMessage, LANG_PRIVATE_CHAT);
                 break;
             }
         }
@@ -174,6 +175,7 @@ void disconnectClient(int cur, Client *clients, Message *sendMessage) {
 	FD_CLR(clients[cur].sockedfd, &masterList);
 	sprintf(sendMessage->data, LANG_DISCONNECT, clients[cur].name);
 	printToOthersInRoom(clients, cur, sendMessage);
+    clients[cur].roomNumber= -1;
     strcpy(clients[cur].name, DEFAULT_CLIENT_NAME); //set client name back to default
 }
 

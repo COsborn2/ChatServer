@@ -9,7 +9,7 @@
 #define LANG_NO_SUCH_ROOM "Server: No room with that name exists."
 #define LANG_ROOM_FULL "Server: The room is full, try connecting later."
 #define LANG_DEFAULT_NAME "Server: You cannot join a room with no name, use the /s command to change it."
-#define LANG_PRIVATE_CHAT "Server: You are no longer in private chat, all messages will be PUBLIC."
+#define LANG_PRIVATE_CHAT "Server: You are no longer in private chat, all messages will be PUBLIC.\n"
 
 #define LANG_HELP_1 "  \"/r\" - list the rooms on the server\n"
 #define LANG_HELP_2 "  \"/l\" - lists people in the current room\n"
