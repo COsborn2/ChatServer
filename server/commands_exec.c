@@ -128,6 +128,8 @@ int setClientName(const int cur, Client * clients, char * suggestedName){
         strncpy(oldName,clients[cur].name, MAX_NAME);//debug
         strncpy(clients[cur].name, suggestedName, MAX_NAME);
         printf("setClientName(): client[%d].name changed to %s from %s\n", cur,clients[cur].name,oldName);//debug
+        snprintf(message.data,MAX,"Server: %s changed name to %s",oldName,clients[cur].name);
+        printToOthersInRoom(clients,cur,&message);
         updateAndWriteMessage(clients[cur].sockedfd, &message, "ok");
         return 1;
     }

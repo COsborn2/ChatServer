@@ -147,7 +147,7 @@ void printToOthersInRoom(const Client *clients, int cur, Message *message) {
 	int i = 0;
 	for (; i < MAXCLIENTS; ++i) {
 		/* Client must be in same room, and not be the current person */
-		if (i != cur &&clients[i].roomNumber == clients[cur].roomNumber && clients[i].connected == 1)
+		if (i != cur &&clients[i].roomNumber == clients[cur].roomNumber && clients[i].roomNumber != -1 && clients[i].connected == 1)
 			writeMessage(clients[i].sockedfd, message);
 	}
 }
