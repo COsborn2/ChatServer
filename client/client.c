@@ -23,6 +23,8 @@ void getUserName(char userName[]);
 
 int containsFileT(char *str);
 
+void containsDisconnect(char *str);
+
 int main(int argc, char **argv) {
 
     int sockfd, n, nb;
@@ -128,6 +130,7 @@ int main(int argc, char **argv) {
             }
 
             write(sockfd, sendline, strlen(sendline) + 1);
+            containsDisconnect(sendline);
         }// END if KB
     }// END listen loop
 
@@ -167,4 +170,13 @@ int containsFileT(char *str) {
         }
     }
     return 0;
+}
+
+void containsDisconnect(char *str) {
+    if (str != NULL && strlen(str) >= 2) {
+        if (str[0] == '/' && str[1] == 'x') {
+            printf("Goodbye...\n\n");
+            exit(0);
+        }
+    }
 }
